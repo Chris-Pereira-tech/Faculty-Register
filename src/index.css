@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --ink: #14213d;
+  --ink-soft: #445069;
+  --paper: #faf9f5;
+  --paper-raised: #ffffff;
+  --paper-alt: #f1eee4;
+  --brass: #8c6a3f;
+  --brass-soft: #e4d9c4;
+  --green: #3b6e4f;
+  --green-soft: #dfe9e1;
+  --rust: #a6432e;
+  --rust-soft: #f0ddd7;
+  --line: #d9d4c7;
+  --line-strong: #b9b2a0;
+
+  --font-display: 'Lora', serif;
+  --font-body: 'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
