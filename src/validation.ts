@@ -8,6 +8,7 @@ export const emptyRecord: FacultyRecord = {
   highestDegree: '',
   university: '',
   specialization: '',
+  degreeCompletionDate: '',
   dateOfJoiningInstitution: '',
   experienceYears: '',
   designationAtJoining: '',
@@ -33,8 +34,10 @@ export function validateRecord(rec: FacultyRecord): FacultyErrors {
   if (!rec.highestDegree.trim()) errs.highestDegree = 'Required';
   if (!rec.dateOfJoiningInstitution) errs.dateOfJoiningInstitution = 'Required';
   if (!rec.presentDesignation.trim()) errs.presentDesignation = 'Required';
-  if (rec.associationNature === 'Contract' && !rec.contractBasis) {
-    errs.contractBasis = 'Required for contract staff';
+  // Contract and Ad hoc staff are both non-regular, so both need the
+  // full/part/hourly basis specified.
+  if ((rec.associationNature === 'Contract' || rec.associationNature === 'Ad hoc') && !rec.contractBasis) {
+    errs.contractBasis = 'Required for contract / ad hoc staff';
   }
   if (rec.currentlyAssociated === 'N' && !rec.dateOfLeaving) {
     errs.dateOfLeaving = 'Required when not currently associated';

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import type { FacultyRecord } from '../types';
+import { DEGREE_OPTIONS, DEPARTMENT_OPTIONS, DESIGNATION_OPTIONS, type FacultyRecord } from '../types';
 import { db } from '../db';
 import { emptyRecord, validateRecord, type FacultyErrors } from '../validation';
+import { calcExperienceYears } from '../dateUtils';
+import SelectOrOther from './SelectOrOther';
 
 type Errors = FacultyErrors;
 
@@ -12,13 +14,13 @@ export default function FacultyForm({
   onSaved: () => void;
   editingRecord?: FacultyRecord | null;
 }) {
-  const [record, setRecord] = useState<FacultyRecord>(editingRecord ?? emptyRecord);
+  const [record, setRecord] = useState<FacultyRecord>({ ...emptyRecord, ...editingRecord });
   const [errors, setErrors] = useState<Errors>({});
   const [statusMsg, setStatusMsg] = useState('');
 
   // Load a record into the form when an edit is requested from the register
   useEffect(() => {
-    setRecord(editingRecord ?? emptyRecord);
+    setRecord({ ...emptyRecord, ...editingRecord });
     setErrors({});
     setStatusMsg('');
   }, [editingRecord]);
@@ -28,14 +30,16 @@ export default function FacultyForm({
     setStatusMsg('');
   }
 
-  function validate(rec: FacultyRecord): Errors {
-    return validateRecord(rec);
-  }
+  // Experience is derived from the joining date, not entered by hand —
+  // recompute it live whenever the date changes.
+  useEffect(() => {
+    setRecord((r) => ({ ...r, experienceYears: calcExperienceYears(r.dateOfJoiningInstitution) }));
+  }, [record.dateOfJoiningInstitution]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const rec: FacultyRecord = { ...record, panNo: record.panNo.toUpperCase() };
-    const errs = validate(rec);
+    const errs = validateRecord(rec);
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
       setStatusMsg('');
@@ -53,6 +57,7 @@ export default function FacultyForm({
   }
 
   const err = (key: keyof FacultyRecord) => errors[key];
+  const RequiredMark = () => <span className="required-mark">*</span>;
 
   return (
     <form className="panel" onSubmit={handleSubmit} noValidate>
@@ -64,7 +69,9 @@ export default function FacultyForm({
         </div>
         <div className="field-grid">
           <div className={`field ${err('facultyName') ? 'has-error' : ''}`}>
-            <label htmlFor="facultyName">Name of the Faculty</label>
+            <label htmlFor="facultyName">
+              Name of the Faculty <RequiredMark />
+            </label>
             <input
               id="facultyName"
               value={record.facultyName}
@@ -75,12 +82,16 @@ export default function FacultyForm({
           </div>
 
           <div className={`field ${err('alliedDepartment') ? 'has-error' : ''}`}>
-            <label htmlFor="alliedDepartment">Allied Department Name</label>
-            <input
+            <label htmlFor="alliedDepartment">
+              Allied Department Name <RequiredMark />
+            </label>
+            <SelectOrOther
               id="alliedDepartment"
               value={record.alliedDepartment}
-              onChange={(e) => update('alliedDepartment', e.target.value)}
-              placeholder="e.g. Computer Engineering"
+              options={DEPARTMENT_OPTIONS}
+              onChange={(v) => update('alliedDepartment', v)}
+              placeholder="Type department"
+              hasError={!!err('alliedDepartment')}
             />
             {err('alliedDepartment') && <span className="error-text">{err('alliedDepartment')}</span>}
           </div>
@@ -120,12 +131,16 @@ export default function FacultyForm({
         </div>
         <div className="field-grid">
           <div className={`field ${err('highestDegree') ? 'has-error' : ''}`}>
-            <label htmlFor="highestDegree">Highest Degree</label>
-            <input
+            <label htmlFor="highestDegree">
+              Highest Degree <RequiredMark />
+            </label>
+            <SelectOrOther
               id="highestDegree"
               value={record.highestDegree}
-              onChange={(e) => update('highestDegree', e.target.value)}
-              placeholder="e.g. Ph.D."
+              options={DEGREE_OPTIONS}
+              onChange={(v) => update('highestDegree', v)}
+              placeholder="Type degree"
+              hasError={!!err('highestDegree')}
             />
             {err('highestDegree') && <span className="error-text">{err('highestDegree')}</span>}
           </div>
@@ -136,6 +151,18 @@ export default function FacultyForm({
               id="university"
               value={record.university}
               onChange={(e) => update('university', e.target.value)}
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="degreeCompletionDate">
+              Date of Completion of Degree <span className="hint">(as per convocation)</span>
+            </label>
+            <input
+              id="degreeCompletionDate"
+              type="date"
+              value={record.degreeCompletionDate}
+              onChange={(e) => update('degreeCompletionDate', e.target.value)}
             />
           </div>
 
@@ -158,7 +185,9 @@ export default function FacultyForm({
         </div>
         <div className="field-grid">
           <div className={`field ${err('dateOfJoiningInstitution') ? 'has-error' : ''}`}>
-            <label htmlFor="doj">Date of Joining in this Institution</label>
+            <label htmlFor="doj">
+              Date of Joining in this Institution <RequiredMark />
+            </label>
             <input
               id="doj"
               type="date"
@@ -171,32 +200,41 @@ export default function FacultyForm({
           </div>
 
           <div className="field">
-            <label htmlFor="experienceYears">Experience in years in current Institute</label>
+            <label htmlFor="experienceYears">
+              Experience in years in current Institute{' '}
+              <span className="hint">(auto-calculated from Date of Joining)</span>
+            </label>
             <input
               id="experienceYears"
-              type="number"
-              min={0}
-              step={0.5}
-              value={record.experienceYears}
-              onChange={(e) => update('experienceYears', e.target.value)}
+              className="mono"
+              value={record.experienceYears ? `${record.experienceYears} yrs` : '—'}
+              readOnly
+              disabled
             />
           </div>
 
           <div className="field">
             <label htmlFor="designationAtJoining">Designation at Time of Joining</label>
-            <input
+            <SelectOrOther
               id="designationAtJoining"
               value={record.designationAtJoining}
-              onChange={(e) => update('designationAtJoining', e.target.value)}
+              options={DESIGNATION_OPTIONS}
+              onChange={(v) => update('designationAtJoining', v)}
+              placeholder="Type designation"
             />
           </div>
 
           <div className={`field ${err('presentDesignation') ? 'has-error' : ''}`}>
-            <label htmlFor="presentDesignation">Present Designation</label>
-            <input
+            <label htmlFor="presentDesignation">
+              Present Designation <RequiredMark />
+            </label>
+            <SelectOrOther
               id="presentDesignation"
               value={record.presentDesignation}
-              onChange={(e) => update('presentDesignation', e.target.value)}
+              options={DESIGNATION_OPTIONS}
+              onChange={(v) => update('presentDesignation', v)}
+              placeholder="Type designation"
+              hasError={!!err('presentDesignation')}
             />
             {err('presentDesignation') && (
               <span className="error-text">{err('presentDesignation')}</span>
@@ -243,13 +281,16 @@ export default function FacultyForm({
 
           <div className={`field ${err('contractBasis') ? 'has-error' : ''}`}>
             <label htmlFor="contractBasis">
-              If contractual — Full time / Part time / Hourly based
+              If contractual or ad hoc — Full time / Part time / Hourly based
+              {(record.associationNature === 'Contract' || record.associationNature === 'Ad hoc') && (
+                <RequiredMark />
+              )}
             </label>
             <select
               id="contractBasis"
               value={record.contractBasis}
               onChange={(e) => update('contractBasis', e.target.value as FacultyRecord['contractBasis'])}
-              disabled={record.associationNature !== 'Contract'}
+              disabled={record.associationNature === 'Regular'}
             >
               <option value="">—</option>
               <option value="Full time">Full time</option>
@@ -279,6 +320,7 @@ export default function FacultyForm({
           <div className={`field ${err('dateOfLeaving') ? 'has-error' : ''}`}>
             <label htmlFor="dateOfLeaving">
               Date of Leaving <span className="hint">(if not currently associated)</span>
+              {record.currentlyAssociated === 'N' && <RequiredMark />}
             </label>
             <input
               id="dateOfLeaving"

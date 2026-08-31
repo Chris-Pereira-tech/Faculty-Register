@@ -11,6 +11,7 @@ export interface FacultyRecord {
   highestDegree: string;
   university: string;
   specialization: string;
+  degreeCompletionDate: string; // ISO date string — as per convocation, optional
   dateOfJoiningInstitution: string; // ISO date string
   experienceYears: string;
   designationAtJoining: string;
@@ -22,6 +23,8 @@ export interface FacultyRecord {
   dateOfLeaving: string; // ISO date string, only if currentlyAssociated === 'N'
 }
 
+// Official 16-column order kept intact for institutional export; the
+// convocation date is appended at the end so it doesn't disturb that layout.
 export const FACULTY_COLUMNS: { key: keyof FacultyRecord; label: string }[] = [
   { key: 'alliedDepartment', label: 'Allied Department Name' },
   { key: 'facultyName', label: 'Name of the Faculty' },
@@ -39,4 +42,38 @@ export const FACULTY_COLUMNS: { key: keyof FacultyRecord; label: string }[] = [
   { key: 'contractBasis', label: 'If contractual mention Full time or Part time / hourly based' },
   { key: 'currentlyAssociated', label: 'Currently Associated (Y/N)' },
   { key: 'dateOfLeaving', label: 'Date of Leaving if any (In case Currently Associated is No)' },
+  { key: 'degreeCompletionDate', label: 'Date of Completion of Degree (as per Convocation)' },
+];
+
+export const DEPARTMENT_OPTIONS = [
+  'Computer Engineering',
+  'Computer Science Engineering',
+  'Electronics and Computer Science',
+  'Mechanical',
+];
+
+export const DEGREE_OPTIONS = [
+  'Ph.D.',
+  'M.Tech.',
+  'M.E.',
+  'M.Phil.',
+  'M.Sc.',
+  'M.A.',
+  'M.Com.',
+  'MBA',
+  'MCA',
+  'B.Tech.',
+  'B.E.',
+  'B.Sc.',
+];
+
+export const DESIGNATION_OPTIONS = [
+  'Professor',
+  'Associate Professor',
+  'Assistant Professor',
+  'Lecturer',
+  'Head of Department',
+  'Principal',
+  'Visiting Faculty',
+  'Adjunct Faculty',
 ];

@@ -2,6 +2,18 @@ import { useRef, useState } from 'react';
 import { db } from '../db';
 import { parseFacultyExcel, type ParsedRow } from '../import';
 import { validateRecord } from '../validation';
+import type { FacultyRecord } from '../types';
+
+const FIELD_LABELS: Partial<Record<keyof FacultyRecord, string>> = {
+  facultyName: 'Name',
+  alliedDepartment: 'Department',
+  panNo: 'PAN No.',
+  highestDegree: 'Highest Degree',
+  dateOfJoiningInstitution: 'Date of Joining',
+  presentDesignation: 'Present Designation',
+  contractBasis: 'Contract Basis',
+  dateOfLeaving: 'Date of Leaving',
+};
 
 interface PreviewRow extends ParsedRow {
   errors: ReturnType<typeof validateRecord>;
@@ -13,6 +25,8 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
   const [fileName, setFileName] = useState('');
   const [preview, setPreview] = useState<PreviewRow[] | null>(null);
   const [unmatchedHeaders, setUnmatchedHeaders] = useState<string[]>([]);
+  const [headerRowNumber, setHeaderRowNumber] = useState(0);
+  const [matchedCount, setMatchedCount] = useState(0);
   const [parseError, setParseError] = useState('');
   const [importMsg, setImportMsg] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -28,12 +42,23 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
         setPreview(null);
         return;
       }
+      if (result.matchedHeaders.length === 0) {
+        setParseError(
+          "Couldn't recognize any column headers in this file, so nothing was imported. " +
+            'Check that the header row (e.g. "Name of the Faculty", "Allied Department Name") ' +
+            "is a plain row of text — not a merged/title cell — and try again."
+        );
+        setPreview(null);
+        return;
+      }
       const rows: PreviewRow[] = result.rows.map((r) => {
         const errors = validateRecord(r.record);
         return { ...r, errors, include: Object.keys(errors).length === 0 };
       });
       setPreview(rows);
       setUnmatchedHeaders(result.unmatchedHeaders);
+      setHeaderRowNumber(result.headerRowNumber);
+      setMatchedCount(result.matchedHeaders.length);
     } catch {
       setParseError("Couldn't read that file. Make sure it's a valid .xlsx or .xls file.");
       setPreview(null);
@@ -118,9 +143,11 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
         {parseError && <p className="error-text" style={{ marginTop: 10 }}>{parseError}</p>}
         {importMsg && <p className="status-msg" style={{ marginTop: 10 }}>{importMsg}</p>}
 
-        {unmatchedHeaders.length > 0 && preview && (
+        {preview && (
           <p className="hint" style={{ marginTop: 10 }}>
-            Columns not recognized and ignored: {unmatchedHeaders.join(', ')}
+            Detected header row {headerRowNumber} · matched {matchedCount} column
+            {matchedCount === 1 ? '' : 's'}
+            {unmatchedHeaders.length > 0 && <> · ignored: {unmatchedHeaders.join(', ')}</>}
           </p>
         )}
       </div>
@@ -174,13 +201,22 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
                       <td>{row.record.alliedDepartment || '—'}</td>
                       <td className="mono">{row.record.panNo || '—'}</td>
                       <td>{row.record.presentDesignation || '—'}</td>
-                      <td>
+                      <td className="status-cell">
                         {isValid ? (
                           <span className="status-dot">Ready</span>
                         ) : (
-                          <span className="status-dot inactive" title={Object.values(row.errors).join(', ')}>
-                            {errorKeys.length} issue{errorKeys.length === 1 ? '' : 's'}
-                          </span>
+                          <div>
+                            <span className="status-dot inactive">
+                              {errorKeys.length} issue{errorKeys.length === 1 ? '' : 's'}
+                            </span>
+                            <div className="row-error-list">
+                              {Object.entries(row.errors).map(([field, msg]) => (
+                                <div key={field}>
+                                  <strong>{FIELD_LABELS[field as keyof FacultyRecord] ?? field}:</strong> {msg}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </td>
                     </tr>
