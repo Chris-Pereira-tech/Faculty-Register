@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import type { AssociationNature, FacultyRecord } from '../types';
 import { db } from '../db';
 import { exportToExcel } from '../export';
+import { printRecords } from '../print';
 import { normalizeDepartment } from '../departmentUtils';
+import { getAcademicYearBounds, wasOnStaffDuringAcademicYear } from '../dateUtils';
 import StatusStamp from './StatusStamp';
 
 type SortKey = 'facultyName' | 'alliedDepartment' | 'dateOfJoiningInstitution' | 'presentDesignation';
@@ -21,6 +23,7 @@ interface ColumnDef {
   label: string;
   sortKey?: SortKey;
   render: (rec: FacultyRecord) => React.ReactNode;
+  text: (rec: FacultyRecord) => string;
   cellClassName?: string;
 }
 
@@ -31,29 +34,36 @@ const COLUMN_DEFS: Record<ColumnId, ColumnDef> = {
     sortKey: 'facultyName',
     cellClassName: 'name',
     render: (rec) => rec.facultyName,
+    text: (rec) => rec.facultyName,
   },
   department: {
     id: 'department',
     label: 'Department',
     sortKey: 'alliedDepartment',
     render: (rec) => rec.alliedDepartment,
+    text: (rec) => rec.alliedDepartment,
   },
   pan: {
     id: 'pan',
     label: 'PAN',
     cellClassName: 'mono',
     render: (rec) => rec.panNo || '—',
+    text: (rec) => rec.panNo || '—',
   },
   degree: {
     id: 'degree',
     label: 'Degree / University',
+    cellClassName: 'wrap-cell',
     render: (rec) => `${rec.highestDegree}${rec.university ? `, ${rec.university}` : ''}`,
+    text: (rec) => `${rec.highestDegree}${rec.university ? `, ${rec.university}` : ''}`,
   },
   designation: {
     id: 'designation',
     label: 'Present Designation',
     sortKey: 'presentDesignation',
+    cellClassName: 'wrap-cell',
     render: (rec) => rec.presentDesignation,
+    text: (rec) => rec.presentDesignation,
   },
   joined: {
     id: 'joined',
@@ -61,11 +71,13 @@ const COLUMN_DEFS: Record<ColumnId, ColumnDef> = {
     sortKey: 'dateOfJoiningInstitution',
     cellClassName: 'mono',
     render: (rec) => rec.dateOfJoiningInstitution || '—',
+    text: (rec) => rec.dateOfJoiningInstitution || '—',
   },
   association: {
     id: 'association',
     label: 'Association',
     render: (rec) => <StatusStamp nature={rec.associationNature} />,
+    text: (rec) => (rec.associationNature === 'Regular' ? 'Regular' : 'Contract / Ad hoc'),
   },
   status: {
     id: 'status',
@@ -75,6 +87,7 @@ const COLUMN_DEFS: Record<ColumnId, ColumnDef> = {
         {rec.currentlyAssociated === 'Y' ? 'Active' : 'Left'}
       </span>
     ),
+    text: (rec) => (rec.currentlyAssociated === 'Y' ? 'Active' : 'Left'),
   },
 };
 
@@ -117,9 +130,11 @@ export default function FacultyTable({
   const [activeFilter, setActiveFilter] = useState<'All' | 'Y' | 'N'>('All');
   const [departmentFilter, setDepartmentFilter] = useState('All');
   const [designationFilter, setDesignationFilter] = useState('All');
+  const [academicYearFilter, setAcademicYearFilter] = useState('All');
   const [sortKey, setSortKey] = useState<SortKey>('facultyName');
   const [sortAsc, setSortAsc] = useState(true);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [reportTitle, setReportTitle] = useState('');
   const [columnOrder, setColumnOrder] = useState<ColumnId[]>(loadColumnOrder);
   const [dragColId, setDragColId] = useState<ColumnId | null>(null);
   const [dragOverColId, setDragOverColId] = useState<ColumnId | null>(null);
@@ -130,12 +145,21 @@ export default function FacultyTable({
 
   const filtered = useMemo(() => {
     let rows = records;
-    if (natureFilter !== 'All') rows = rows.filter((r) => r.associationNature === natureFilter);
+    if (natureFilter === 'Regular') rows = rows.filter((r) => r.associationNature === 'Regular');
+    if (natureFilter === 'Contract / Ad hoc') {
+      // Bucket anything not Regular — covers the merged value going
+      // forward and any legacy separate 'Contract'/'Ad hoc' records.
+      rows = rows.filter((r) => r.associationNature !== 'Regular');
+    }
     if (activeFilter !== 'All') rows = rows.filter((r) => r.currentlyAssociated === activeFilter);
     if (departmentFilter !== 'All') {
       rows = rows.filter((r) => normalizeDepartment(r.alliedDepartment) === departmentFilter);
     }
     if (designationFilter !== 'All') rows = rows.filter((r) => r.presentDesignation === designationFilter);
+    if (academicYearFilter !== 'All') {
+      const startYear = Number(academicYearFilter);
+      rows = rows.filter((r) => wasOnStaffDuringAcademicYear(r, startYear));
+    }
     if (query.trim()) {
       const q = query.trim().toLowerCase();
       rows = rows.filter(
@@ -154,7 +178,34 @@ export default function FacultyTable({
       return 0;
     });
     return sorted;
-  }, [records, query, natureFilter, activeFilter, departmentFilter, designationFilter, sortKey, sortAsc]);
+  }, [
+    records,
+    query,
+    natureFilter,
+    activeFilter,
+    departmentFilter,
+    designationFilter,
+    academicYearFilter,
+    sortKey,
+    sortAsc,
+  ]);
+
+  // Academic years to offer in the filter: from the earliest join date on
+  // record through one year ahead of the current year, newest first.
+  const academicYearOptions = useMemo(() => {
+    const currentCalendarYear = new Date().getFullYear();
+    let earliest = currentCalendarYear;
+    records.forEach((r) => {
+      if (r.dateOfJoiningInstitution) {
+        const y = Number(r.dateOfJoiningInstitution.slice(0, 4));
+        if (!isNaN(y) && y < earliest) earliest = y;
+      }
+    });
+    const latest = currentCalendarYear + 1;
+    const years: number[] = [];
+    for (let y = latest; y >= earliest; y--) years.push(y);
+    return years.map((y) => ({ value: String(y), label: getAcademicYearBounds(y).label }));
+  }, [records]);
 
   const departmentOptions = useMemo(() => {
     const set = new Set(records.map((r) => normalizeDepartment(r.alliedDepartment)).filter(Boolean));
@@ -178,6 +229,15 @@ export default function FacultyTable({
       setDesignationFilter('All');
     }
   }, [designationOptions, designationFilter]);
+
+  useEffect(() => {
+    if (
+      academicYearFilter !== 'All' &&
+      !academicYearOptions.some((o) => o.value === academicYearFilter)
+    ) {
+      setAcademicYearFilter('All');
+    }
+  }, [academicYearOptions, academicYearFilter]);
 
   // Drop any selected ids that no longer exist (e.g. deleted from elsewhere)
   useEffect(() => {
@@ -268,6 +328,46 @@ export default function FacultyTable({
 
   const orderedColumns = columnOrder.map((id) => COLUMN_DEFS[id]);
 
+  // Builds a sensible title from whatever filters are active, so a
+  // department + status filtered view prints/exports with a meaningful
+  // label even if the person hasn't typed a custom title — e.g. filtering
+  // to Computer Engineering + Active suggests "Computer Engineering —
+  // Active Faculty" automatically.
+  const autoTitle = (() => {
+    const parts: string[] = [];
+    parts.push(departmentFilter !== 'All' ? departmentFilter : 'All Departments');
+    if (designationFilter !== 'All') parts.push(designationFilter);
+    if (natureFilter !== 'All') parts.push(natureFilter);
+    if (activeFilter !== 'All') parts.push(activeFilter === 'Y' ? 'Active Faculty' : 'Left Faculty');
+    if (academicYearFilter !== 'All') {
+      parts.push(`AY ${getAcademicYearBounds(Number(academicYearFilter)).label}`);
+    }
+    return parts.join(' — ');
+  })();
+
+  const effectiveTitle = reportTitle.trim() || autoTitle;
+
+  // A selection only means "just these rows" if it's a genuine subset —
+  // selecting literally every visible row (e.g. via the header "select
+  // all" checkbox) should behave the same as selecting nothing, not as a
+  // deliberate "selected records" print/label.
+  const isPartialSelection = selected.size > 0 && selected.size < filtered.length;
+
+  function handlePrint() {
+    const rowsToPrint = isPartialSelection
+      ? filtered.filter((r) => r.id != null && selected.has(r.id))
+      : filtered;
+    if (rowsToPrint.length === 0) return;
+    const printColumns = orderedColumns.map((col) => ({ label: col.label, value: col.text }));
+    const title = isPartialSelection ? `${effectiveTitle} — Selected Records` : effectiveTitle;
+    printRecords(rowsToPrint, printColumns, title);
+  }
+
+  function handleExport() {
+    const safeName = effectiveTitle.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_');
+    exportToExcel(filtered, `${safeName || 'Faculty_Register'}.xlsx`);
+  }
+
   return (
     <div className="panel">
       <div className="register-toolbar">
@@ -284,7 +384,7 @@ export default function FacultyTable({
         </div>
 
         <div className="filter-chip-group">
-          {(['All', 'Regular', 'Contract', 'Ad hoc'] as const).map((opt) => (
+          {(['All', 'Regular', 'Contract / Ad hoc'] as const).map((opt) => (
             <button
               key={opt}
               className={`filter-chip ${natureFilter === opt ? 'active' : ''}`}
@@ -335,6 +435,21 @@ export default function FacultyTable({
           ))}
         </select>
 
+        <select
+          className="filter-select"
+          value={academicYearFilter}
+          onChange={(e) => setAcademicYearFilter(e.target.value)}
+          aria-label="Filter by academic year"
+          title="Includes anyone on staff for any part of that academic year (1 June – 31 May), even if they joined or left partway through"
+        >
+          <option value="All">All academic years</option>
+          {academicYearOptions.map((y) => (
+            <option key={y.value} value={y.value}>
+              AY {y.label}
+            </option>
+          ))}
+        </select>
+
         <div className="toolbar-right">
           {selected.size > 0 && (
             <button className="btn btn--ghost btn--danger" onClick={handleBulkDelete}>
@@ -344,13 +459,30 @@ export default function FacultyTable({
           <button className="btn btn--ghost" onClick={() => setColumnOrder(DEFAULT_ORDER)}>
             Reset column order
           </button>
+          <button className="btn btn--ghost" onClick={handlePrint}>
+            {isPartialSelection ? `Print selected (${selected.size})` : `Print (${filtered.length})`}
+          </button>
           <button
             className="btn btn--ghost"
-            onClick={() => exportToExcel(filtered, 'Faculty_Register.xlsx')}
+            onClick={handleExport}
           >
             Export to Excel ({filtered.length})
           </button>
         </div>
+      </div>
+
+      <div className="report-title-row">
+        <label htmlFor="reportTitle">Report title</label>
+        <input
+          id="reportTitle"
+          value={reportTitle}
+          onChange={(e) => setReportTitle(e.target.value)}
+          placeholder={autoTitle}
+        />
+        <span className="hint">
+          Used as the heading for Print and as the Excel file name. Leave blank to auto-fill from
+          your filters above.
+        </span>
       </div>
 
       <p className="hint" style={{ padding: '0 22px 12px' }}>

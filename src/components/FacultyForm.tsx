@@ -97,7 +97,9 @@ export default function FacultyForm({
           </div>
 
           <div className={`field ${err('panNo') ? 'has-error' : ''}`}>
-            <label htmlFor="panNo">PAN No.</label>
+            <label htmlFor="panNo">
+              PAN No. <RequiredMark />
+            </label>
             <input
               id="panNo"
               className="mono"
@@ -109,9 +111,9 @@ export default function FacultyForm({
             {err('panNo') && <span className="error-text">{err('panNo')}</span>}
           </div>
 
-          <div className="field">
+          <div className={`field ${err('apaarId') ? 'has-error' : ''}`}>
             <label htmlFor="apaarId">
-              APAAR Faculty ID <span className="hint">(if any)</span>
+              APAAR Faculty ID <RequiredMark />
             </label>
             <input
               id="apaarId"
@@ -119,6 +121,7 @@ export default function FacultyForm({
               value={record.apaarId}
               onChange={(e) => update('apaarId', e.target.value)}
             />
+            {err('apaarId') && <span className="error-text">{err('apaarId')}</span>}
           </div>
         </div>
       </div>
@@ -145,18 +148,22 @@ export default function FacultyForm({
             {err('highestDegree') && <span className="error-text">{err('highestDegree')}</span>}
           </div>
 
-          <div className="field">
-            <label htmlFor="university">University</label>
+          <div className={`field ${err('university') ? 'has-error' : ''}`}>
+            <label htmlFor="university">
+              University <RequiredMark />
+            </label>
             <input
               id="university"
               value={record.university}
               onChange={(e) => update('university', e.target.value)}
             />
+            {err('university') && <span className="error-text">{err('university')}</span>}
           </div>
 
-          <div className="field">
+          <div className={`field ${err('degreeCompletionDate') ? 'has-error' : ''}`}>
             <label htmlFor="degreeCompletionDate">
-              Date of Completion of Degree <span className="hint">(as per convocation)</span>
+              Date of Completion of Degree <span className="hint">(as per convocation)</span>{' '}
+              <RequiredMark />
             </label>
             <input
               id="degreeCompletionDate"
@@ -164,15 +171,21 @@ export default function FacultyForm({
               value={record.degreeCompletionDate}
               onChange={(e) => update('degreeCompletionDate', e.target.value)}
             />
+            {err('degreeCompletionDate') && (
+              <span className="error-text">{err('degreeCompletionDate')}</span>
+            )}
           </div>
 
-          <div className="field field--wide">
-            <label htmlFor="specialization">Area of Specialization</label>
+          <div className={`field field--wide ${err('specialization') ? 'has-error' : ''}`}>
+            <label htmlFor="specialization">
+              Area of Specialization <RequiredMark />
+            </label>
             <input
               id="specialization"
               value={record.specialization}
               onChange={(e) => update('specialization', e.target.value)}
             />
+            {err('specialization') && <span className="error-text">{err('specialization')}</span>}
           </div>
         </div>
       </div>
@@ -213,15 +226,21 @@ export default function FacultyForm({
             />
           </div>
 
-          <div className="field">
-            <label htmlFor="designationAtJoining">Designation at Time of Joining</label>
+          <div className={`field ${err('designationAtJoining') ? 'has-error' : ''}`}>
+            <label htmlFor="designationAtJoining">
+              Designation at Time of Joining <RequiredMark />
+            </label>
             <SelectOrOther
               id="designationAtJoining"
               value={record.designationAtJoining}
               options={DESIGNATION_OPTIONS}
               onChange={(v) => update('designationAtJoining', v)}
               placeholder="Type designation"
+              hasError={!!err('designationAtJoining')}
             />
+            {err('designationAtJoining') && (
+              <span className="error-text">{err('designationAtJoining')}</span>
+            )}
           </div>
 
           <div className={`field ${err('presentDesignation') ? 'has-error' : ''}`}>
@@ -241,9 +260,9 @@ export default function FacultyForm({
             )}
           </div>
 
-          <div className="field field--wide">
+          <div className={`field field--wide ${err('professorDesignationDate') ? 'has-error' : ''}`}>
             <label htmlFor="profDate">
-              Date Designated as Professor / Associate Professor <span className="hint">(if any)</span>
+              Date Designated as Professor / Associate Professor <RequiredMark />
             </label>
             <input
               id="profDate"
@@ -251,6 +270,9 @@ export default function FacultyForm({
               value={record.professorDesignationDate}
               onChange={(e) => update('professorDesignationDate', e.target.value)}
             />
+            {err('professorDesignationDate') && (
+              <span className="error-text">{err('professorDesignationDate')}</span>
+            )}
           </div>
         </div>
       </div>
@@ -265,7 +287,7 @@ export default function FacultyForm({
           <div className="field">
             <label>Nature of Association</label>
             <div className="radio-row">
-              {(['Regular', 'Contract', 'Ad hoc'] as const).map((opt) => (
+              {(['Regular', 'Contract / Ad hoc'] as const).map((opt) => (
                 <label key={opt}>
                   <input
                     type="radio"
@@ -281,10 +303,8 @@ export default function FacultyForm({
 
           <div className={`field ${err('contractBasis') ? 'has-error' : ''}`}>
             <label htmlFor="contractBasis">
-              If contractual or ad hoc — Full time / Part time / Hourly based
-              {(record.associationNature === 'Contract' || record.associationNature === 'Ad hoc') && (
-                <RequiredMark />
-              )}
+              If contractual or ad hoc — Full time / Part time
+              {record.associationNature === 'Contract / Ad hoc' && <RequiredMark />}
             </label>
             <select
               id="contractBasis"
@@ -295,7 +315,6 @@ export default function FacultyForm({
               <option value="">—</option>
               <option value="Full time">Full time</option>
               <option value="Part time">Part time</option>
-              <option value="Hourly based">Hourly based</option>
             </select>
             {err('contractBasis') && <span className="error-text">{err('contractBasis')}</span>}
           </div>

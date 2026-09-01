@@ -46,6 +46,13 @@
   text-align: right;
 }
 
+.letterhead__count-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
 .letterhead__count strong {
   font-size: 20px;
   color: var(--ink);
@@ -102,6 +109,15 @@
   max-width: 1180px;
   width: 100%;
   margin: 0 auto;
+}
+
+/* Register view needs more horizontal room than the form so the table
+   doesn't need side-scrolling on typical desktop widths. Percentage-based
+   (not vw) so it can't overflow past the actual available width when a
+   scrollbar is present — vw ignores scrollbar width and can throw off
+   centering. */
+.main--wide {
+  max-width: 1900px;
 }
 
 .panel {
@@ -338,6 +354,44 @@
   flex-wrap: wrap;
 }
 
+.report-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-alt);
+  flex-wrap: wrap;
+}
+
+.report-title-row label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.report-title-row input {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  min-width: 260px;
+  flex: 0 1 360px;
+}
+
+.report-title-row input:focus {
+  border-color: var(--brass);
+}
+
+.report-title-row .hint {
+  font-size: 11.5px;
+  color: var(--line-strong);
+}
+
 .search-box {
   flex: 1;
   min-width: 220px;
@@ -345,7 +399,7 @@
 }
 
 .search-box input {
-  width: 100%;
+  width: 85%;
   padding: 9px 12px 9px 32px;
   border: 1px solid var(--line);
   border-radius: 5px;
@@ -409,7 +463,7 @@ table.ledger {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  min-width: 1100px;
+  min-width: 980px;
 }
 
 table.ledger thead th {
@@ -550,6 +604,13 @@ table.ledger td.mono {
 
 table.ledger td.name {
   font-weight: 600;
+}
+
+table.ledger td.wrap-cell,
+table.ledger th.wrap-col {
+  white-space: normal;
+  max-width: 260px;
+  line-height: 1.4;
 }
 
 .row-actions {
@@ -699,4 +760,78 @@ table.ledger td.name {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* ---------- Login gate ---------- */
+.login-screen {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 32px 30px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 8px 28px rgba(20, 33, 61, 0.08);
+}
+
+.login-card__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  margin: 0 0 4px;
+  text-align: center;
+}
+
+.login-card__title small {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.login-card__hint {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 10px 0 20px;
+}
+
+.login-card .field {
+  margin-bottom: 18px;
+}
+
+.login-card .btn {
+  width: 100%;
+}
+
+.login-card .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lock-btn {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.lock-btn:hover {
+  border-color: var(--ink-soft);
+  color: var(--ink);
 }

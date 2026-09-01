@@ -1,5 +1,5 @@
-export type AssociationNature = 'Regular' | 'Contract' | 'Ad hoc';
-export type ContractBasis = 'Full time' | 'Part time' | 'Hourly based' | '';
+export type AssociationNature = 'Regular' | 'Contract / Ad hoc';
+export type ContractBasis = 'Full time' | 'Part time' | '';
 export type YesNo = 'Y' | 'N';
 
 export interface FacultyRecord {

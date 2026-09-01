@@ -28,15 +28,23 @@ export function validateRecord(rec: FacultyRecord): FacultyErrors {
   const errs: FacultyErrors = {};
   if (!rec.facultyName.trim()) errs.facultyName = 'Required';
   if (!rec.alliedDepartment.trim()) errs.alliedDepartment = 'Required';
-  if (rec.panNo && !PAN_REGEX.test(rec.panNo.toUpperCase())) {
+  if (!rec.panNo.trim()) {
+    errs.panNo = 'Required';
+  } else if (!PAN_REGEX.test(rec.panNo.toUpperCase())) {
     errs.panNo = 'Format: AAAAA9999A';
   }
+  if (!rec.apaarId.trim()) errs.apaarId = 'Required';
   if (!rec.highestDegree.trim()) errs.highestDegree = 'Required';
+  if (!rec.university.trim()) errs.university = 'Required';
+  if (!rec.specialization.trim()) errs.specialization = 'Required';
+  if (!rec.degreeCompletionDate) errs.degreeCompletionDate = 'Required';
   if (!rec.dateOfJoiningInstitution) errs.dateOfJoiningInstitution = 'Required';
+  if (!rec.designationAtJoining.trim()) errs.designationAtJoining = 'Required';
   if (!rec.presentDesignation.trim()) errs.presentDesignation = 'Required';
-  // Contract and Ad hoc staff are both non-regular, so both need the
-  // full/part/hourly basis specified.
-  if ((rec.associationNature === 'Contract' || rec.associationNature === 'Ad hoc') && !rec.contractBasis) {
+  if (!rec.professorDesignationDate) errs.professorDesignationDate = 'Required';
+  // Contract / Ad hoc staff need the full/part/hourly basis specified;
+  // Regular staff don't have one.
+  if (rec.associationNature === 'Contract / Ad hoc' && !rec.contractBasis) {
     errs.contractBasis = 'Required for contract / ad hoc staff';
   }
   if (rec.currentlyAssociated === 'N' && !rec.dateOfLeaving) {

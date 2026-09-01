@@ -20,10 +20,6 @@
   --font-mono: 'IBM Plex Mono', monospace;
 }
 
-* {
-  box-sizing: border-box;
-}
-
 html,
 body,
 #root {

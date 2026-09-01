@@ -170,16 +170,14 @@ function excelDateToISO(value: unknown): string {
 function normalizeAssociationNature(value: unknown): AssociationNature {
   const s = String(value ?? '').toLowerCase().replace(/[\s-]/g, '');
   if (s.includes('regular')) return 'Regular';
-  if (s.includes('contract')) return 'Contract';
-  if (s.includes('adhoc')) return 'Ad hoc';
+  if (s.includes('contract') || s.includes('adhoc')) return 'Contract / Ad hoc';
   return 'Regular';
 }
 
 function normalizeContractBasis(value: unknown): ContractBasis {
   const s = String(value ?? '').toLowerCase();
   if (s.includes('full')) return 'Full time';
-  if (s.includes('part')) return 'Part time';
-  if (s.includes('hour')) return 'Hourly based';
+  if (s.includes('part') || s.includes('hour')) return 'Part time';
   return '';
 }
 
