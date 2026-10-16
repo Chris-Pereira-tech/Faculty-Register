@@ -123,15 +123,21 @@ function loadColumnOrder(): ColumnId[] {
 export default function FacultyTable({
   records,
   onEdit,
+  initialFilters,
 }: {
   records: FacultyRecord[];
   onEdit: (rec: FacultyRecord) => void;
+  initialFilters?: {
+    department?: string;
+    designation?: string;
+    status?: 'All' | 'Y' | 'N';
+  } | null;
 }) {
   const [query, setQuery] = useState('');
   const [natureFilter, setNatureFilter] = useState<AssociationNature | 'All'>('All');
-  const [activeFilter, setActiveFilter] = useState<'All' | 'Y' | 'N'>('All');
-  const [departmentFilter, setDepartmentFilter] = useState('All');
-  const [designationFilter, setDesignationFilter] = useState('All');
+  const [activeFilter, setActiveFilter] = useState<'All' | 'Y' | 'N'>(initialFilters?.status ?? 'All');
+  const [departmentFilter, setDepartmentFilter] = useState(initialFilters?.department ?? 'All');
+  const [designationFilter, setDesignationFilter] = useState(initialFilters?.designation ?? 'All');
   const [academicYearFilter, setAcademicYearFilter] = useState('All');
   const [sortKey, setSortKey] = useState<SortKey>('facultyName');
   const [sortAsc, setSortAsc] = useState(true);
@@ -140,6 +146,14 @@ export default function FacultyTable({
   const [columnOrder, setColumnOrder] = useState<ColumnId[]>(loadColumnOrder);
   const [dragColId, setDragColId] = useState<ColumnId | null>(null);
   const [dragOverColId, setDragOverColId] = useState<ColumnId | null>(null);
+
+  useEffect(() => {
+    if (initialFilters) {
+      if (initialFilters.department !== undefined) setDepartmentFilter(initialFilters.department);
+      if (initialFilters.designation !== undefined) setDesignationFilter(initialFilters.designation);
+      if (initialFilters.status !== undefined) setActiveFilter(initialFilters.status);
+    }
+  }, [initialFilters]);
 
   useEffect(() => {
     localStorage.setItem(COLUMN_ORDER_KEY, JSON.stringify(columnOrder));
