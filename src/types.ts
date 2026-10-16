@@ -21,6 +21,7 @@ export interface FacultyRecord {
   contractBasis: ContractBasis;
   currentlyAssociated: YesNo;
   dateOfLeaving: string; // ISO date string, only if currentlyAssociated === 'N'
+  pursuingPhd?: boolean;
 }
 
 // Official 16-column order kept intact for institutional export; the
@@ -53,18 +54,8 @@ export const DEPARTMENT_OPTIONS = [
 ];
 
 export const DEGREE_OPTIONS = [
-  'Ph.D.',
-  'M.Tech.',
-  'M.E.',
-  'M.Phil.',
-  'M.Sc.',
-  'M.A.',
-  'M.Com.',
-  'MBA',
-  'MCA',
-  'B.Tech.',
-  'B.E.',
-  'B.Sc.',
+  'ME',
+  'PhD',
 ];
 
 export const DESIGNATION_OPTIONS = [

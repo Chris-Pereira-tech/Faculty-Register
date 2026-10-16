@@ -23,7 +23,7 @@
 .letterhead__title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 26px;
+  font-size: 28px;
   letter-spacing: 0.01em;
   margin: 0;
 }
@@ -32,7 +32,7 @@
   display: block;
   font-family: var(--font-body);
   font-weight: 500;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-soft);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -41,7 +41,7 @@
 
 .letterhead__count {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-soft);
   text-align: right;
 }
@@ -50,11 +50,11 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 6px;
 }
 
 .letterhead__count strong {
-  font-size: 20px;
+  font-size: 24px;
   color: var(--ink);
   display: block;
   font-family: var(--font-display);
@@ -70,8 +70,8 @@
   border: 1px solid transparent;
   border-bottom: none;
   background: transparent;
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 12px 22px;
+  font-size: 15.5px;
   font-weight: 500;
   color: var(--ink-soft);
   cursor: pointer;
@@ -128,7 +128,7 @@
 
 /* ---------- Form ---------- */
 .form-section {
-  padding: 22px 26px;
+  padding: 24px 28px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -145,25 +145,25 @@
 
 .form-section__number {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--brass);
   border: 1px solid var(--brass-soft);
   background: var(--brass-soft);
   border-radius: 3px;
-  padding: 1px 6px;
+  padding: 1px 7px;
 }
 
 .form-section__title {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   margin: 0;
 }
 
 .field-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px 20px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px 22px;
 }
 
 .field {
@@ -177,16 +177,16 @@
 }
 
 .field label {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--ink-soft);
   letter-spacing: 0.01em;
-  min-height: 34px; /* reserves space for a wrapped hint so inputs stay aligned across a row */
-  line-height: 1.35;
+  min-height: 38px; /* reserves space for a wrapped hint so inputs stay aligned across a row */
+  line-height: 1.38;
 }
 
 .field .hint {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--line-strong);
   font-weight: 400;
 }
@@ -194,8 +194,8 @@
 .field input,
 .field select {
   font-family: var(--font-body);
-  font-size: 14px;
-  padding: 9px 11px;
+  font-size: 15px;
+  padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 5px;
   background: var(--paper);
@@ -238,13 +238,13 @@
 .select-or-other {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .select-or-other input {
   font-family: var(--font-body);
-  font-size: 14px;
-  padding: 9px 11px;
+  font-size: 15px;
+  padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 5px;
   background: var(--paper);
@@ -256,21 +256,40 @@
   background: none;
   border: none;
   padding: 0;
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--brass);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .field .error-text {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--rust);
   font-weight: 500;
 }
 
+.checkbox-field-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-field-inline input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--brass);
+  cursor: pointer;
+}
+
 .radio-row {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   flex-wrap: wrap;
   padding-top: 4px;
 }
@@ -278,8 +297,8 @@
 .radio-row label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
+  gap: 7px;
+  font-size: 14.5px;
   font-weight: 500;
   color: var(--ink);
   cursor: pointer;
@@ -287,26 +306,28 @@
 
 .radio-row input {
   accent-color: var(--brass);
+  width: 16px;
+  height: 16px;
 }
 
 .form-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 26px;
+  padding: 20px 28px;
   background: var(--paper-alt);
   border-top: 1px solid var(--line);
   border-radius: 0 0 8px 8px;
 }
 
 .form-actions .status-msg {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--green);
   font-weight: 500;
 }
 
 .btn {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   padding: 10px 22px;
   border-radius: 5px;
@@ -365,7 +386,7 @@
 }
 
 .report-title-row label {
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--ink-soft);
   white-space: nowrap;
@@ -373,14 +394,14 @@
 
 .report-title-row input {
   font-family: var(--font-body);
-  font-size: 13px;
-  padding: 6px 10px;
+  font-size: 14px;
+  padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 5px;
   background: var(--paper-raised);
   color: var(--ink);
   min-width: 260px;
-  flex: 0 1 360px;
+  flex: 0 1 380px;
 }
 
 .report-title-row input:focus {
@@ -388,7 +409,7 @@
 }
 
 .report-title-row .hint {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--line-strong);
 }
 
@@ -400,16 +421,16 @@
 
 .search-box input {
   width: 85%;
-  padding: 9px 12px 9px 32px;
+  padding: 10px 14px 10px 36px;
   border: 1px solid var(--line);
   border-radius: 5px;
-  font-size: 14px;
+  font-size: 14.5px;
   background: var(--paper);
 }
 
 .search-box svg {
   position: absolute;
-  left: 10px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   opacity: 0.5;
@@ -422,9 +443,9 @@
 }
 
 .filter-chip {
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 500;
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: var(--paper);
@@ -439,15 +460,15 @@
 }
 
 .filter-select {
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 500;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: var(--paper);
   color: var(--ink-soft);
   cursor: pointer;
-  max-width: 180px;
+  max-width: 200px;
 }
 
 .filter-select:focus {
@@ -462,15 +483,15 @@
 table.ledger {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
-  min-width: 980px;
+  font-size: 14.5px;
+  min-width: 1020px;
 }
 
 table.ledger thead th {
   text-align: left;
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 11.5px;
+  font-size: 12.5px;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -502,7 +523,7 @@ table.ledger thead th.draggable-col.drag-over {
 .drag-handle {
   color: var(--line-strong);
   margin-right: 5px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0;
 }
 
@@ -529,15 +550,15 @@ table.ledger tbody tr.selected {
 
 th.checkbox-col,
 td.checkbox-col {
-  width: 36px;
+  width: 40px;
   padding-left: 16px;
   padding-right: 4px;
 }
 
 .checkbox-col input[type='checkbox'] {
   accent-color: var(--brass);
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 }
 
@@ -560,21 +581,21 @@ td.checkbox-col {
 
 .dropzone__title {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 16.5px;
   font-weight: 600;
   margin: 0 0 6px;
   color: var(--ink);
 }
 
 .dropzone__hint {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--ink-soft);
   margin: 0;
 }
 
 .row-error-list {
   margin-top: 4px;
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--rust);
   white-space: normal;
   line-height: 1.5;
@@ -591,14 +612,14 @@ table.ledger td.status-cell {
 }
 
 table.ledger td {
-  padding: 10px 14px;
+  padding: 12px 14px;
   vertical-align: middle;
   white-space: nowrap;
 }
 
 table.ledger td.mono {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--ink-soft);
 }
 
@@ -609,8 +630,8 @@ table.ledger td.name {
 table.ledger td.wrap-cell,
 table.ledger th.wrap-col {
   white-space: normal;
-  max-width: 260px;
-  line-height: 1.4;
+  max-width: 280px;
+  line-height: 1.45;
 }
 
 .row-actions {
@@ -622,9 +643,9 @@ table.ledger th.wrap-col {
   border: 1px solid var(--line);
   background: var(--paper-raised);
   border-radius: 4px;
-  padding: 5px 8px;
+  padding: 6px 10px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink-soft);
 }
 
@@ -643,12 +664,12 @@ table.ledger th.wrap-col {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 74px;
-  padding: 3px 10px;
+  min-width: 80px;
+  padding: 4px 11px;
   border-radius: 3px;
   border: 1.5px solid currentColor;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -673,12 +694,12 @@ table.ledger th.wrap-col {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 60px;
-  padding: 3px 10px;
+  min-width: 66px;
+  padding: 4px 11px;
   border-radius: 3px;
   border: 1.5px solid currentColor;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -698,15 +719,15 @@ table.ledger th.wrap-col {
 .status-dot {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 7px;
+  font-size: 13px;
   font-weight: 600;
 }
 
 .status-dot::before {
   content: '';
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: var(--green);
 }
@@ -732,14 +753,14 @@ table.ledger th.wrap-col {
 
 .empty-state h3 {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 21px;
   color: var(--ink);
   margin: 0 0 8px;
 }
 
 .empty-state p {
   margin: 0 0 20px;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .toolbar-right {
@@ -775,16 +796,16 @@ table.ledger th.wrap-col {
   background: var(--paper-raised);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 32px 30px;
+  padding: 36px 32px;
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
   box-shadow: 0 8px 28px rgba(20, 33, 61, 0.08);
 }
 
 .login-card__title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 24px;
   margin: 0 0 4px;
   text-align: center;
 }
@@ -793,7 +814,7 @@ table.ledger th.wrap-col {
   display: block;
   font-family: var(--font-body);
   font-weight: 500;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink-soft);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -802,13 +823,13 @@ table.ledger th.wrap-col {
 
 .login-card__hint {
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-soft);
   margin: 10px 0 20px;
 }
 
 .login-card .field {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .login-card .btn {
@@ -821,13 +842,13 @@ table.ledger th.wrap-col {
 }
 
 .lock-btn {
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--ink-soft);
   background: none;
   border: 1px solid var(--line);
   border-radius: 5px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   cursor: pointer;
 }
 

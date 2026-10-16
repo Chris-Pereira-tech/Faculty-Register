@@ -1,9 +1,21 @@
 import * as XLSX from 'xlsx';
 import { FACULTY_COLUMNS, type FacultyRecord } from './types';
+import { formatDegree } from './degreeUtils';
+import { normalizeDesignation } from './designationUtils';
 
 export function exportToExcel(records: FacultyRecord[], filename = 'Faculty_Register.xlsx') {
   const headers = FACULTY_COLUMNS.map((c) => c.label);
-  const rows = records.map((rec) => FACULTY_COLUMNS.map((c) => rec[c.key] ?? ''));
+  const rows = records.map((rec) =>
+    FACULTY_COLUMNS.map((c) => {
+      if (c.key === 'highestDegree') {
+        return formatDegree(rec.highestDegree, rec.pursuingPhd);
+      }
+      if (c.key === 'presentDesignation' || c.key === 'designationAtJoining') {
+        return normalizeDesignation(String(rec[c.key] ?? ''));
+      }
+      return rec[c.key] ?? '';
+    })
+  );
 
   const worksheetData = [headers, ...rows];
   const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);

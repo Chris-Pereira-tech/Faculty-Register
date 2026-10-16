@@ -3,6 +3,8 @@ import { DEGREE_OPTIONS, DEPARTMENT_OPTIONS, DESIGNATION_OPTIONS, type FacultyRe
 import { db } from '../db';
 import { emptyRecord, validateRecord, type FacultyErrors } from '../validation';
 import { calcExperienceYears } from '../dateUtils';
+import { normalizeDesignation } from '../designationUtils';
+import { formatDegree, parseDegree } from '../degreeUtils';
 import SelectOrOther from './SelectOrOther';
 
 type Errors = FacultyErrors;
@@ -30,6 +32,33 @@ export default function FacultyForm({
     setStatusMsg('');
   }
 
+  // Derived degree fields for ME / PhD / Pursuing PhD handling
+  const { baseDegree, pursuingPhd: parsedPursuing } = parseDegree(record.highestDegree);
+  const isPursuingPhd = record.pursuingPhd ?? parsedPursuing;
+  const isMeSelected = baseDegree === 'ME';
+
+  function handleDegreeChange(newBase: string) {
+    const isMe = newBase === 'ME';
+    const nextPursuing = isMe ? isPursuingPhd : false;
+    const formatted = formatDegree(newBase, nextPursuing);
+    setRecord((r) => ({
+      ...r,
+      highestDegree: formatted,
+      pursuingPhd: nextPursuing,
+    }));
+    setStatusMsg('');
+  }
+
+  function handlePursuingChange(checked: boolean) {
+    const formatted = formatDegree(baseDegree, checked);
+    setRecord((r) => ({
+      ...r,
+      highestDegree: formatted,
+      pursuingPhd: checked,
+    }));
+    setStatusMsg('');
+  }
+
   // Experience is derived from the joining date, not entered by hand —
   // recompute it live whenever the date changes.
   useEffect(() => {
@@ -38,7 +67,15 @@ export default function FacultyForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const rec: FacultyRecord = { ...record, panNo: record.panNo.toUpperCase() };
+    const effectivePursuing = baseDegree === 'ME' ? isPursuingPhd : false;
+    const rec: FacultyRecord = {
+      ...record,
+      panNo: record.panNo.toUpperCase(),
+      highestDegree: formatDegree(baseDegree, effectivePursuing),
+      pursuingPhd: effectivePursuing,
+      presentDesignation: normalizeDesignation(record.presentDesignation),
+      designationAtJoining: normalizeDesignation(record.designationAtJoining),
+    };
     const errs = validateRecord(rec);
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
@@ -139,12 +176,22 @@ export default function FacultyForm({
             </label>
             <SelectOrOther
               id="highestDegree"
-              value={record.highestDegree}
+              value={baseDegree}
               options={DEGREE_OPTIONS}
-              onChange={(v) => update('highestDegree', v)}
+              onChange={handleDegreeChange}
               placeholder="Type degree"
               hasError={!!err('highestDegree')}
             />
+            {isMeSelected && (
+              <label className="checkbox-field-inline">
+                <input
+                  type="checkbox"
+                  checked={isPursuingPhd}
+                  onChange={(e) => handlePursuingChange(e.target.checked)}
+                />
+                <span>Pursuing Ph.D.</span>
+              </label>
+            )}
             {err('highestDegree') && <span className="error-text">{err('highestDegree')}</span>}
           </div>
 

@@ -4,6 +4,8 @@ import { db } from '../db';
 import { exportToExcel } from '../export';
 import { printRecords } from '../print';
 import { normalizeDepartment } from '../departmentUtils';
+import { normalizeDesignation } from '../designationUtils';
+import { formatDegree } from '../degreeUtils';
 import { getAcademicYearBounds, wasOnStaffDuringAcademicYear } from '../dateUtils';
 import StatusStamp from './StatusStamp';
 
@@ -54,16 +56,16 @@ const COLUMN_DEFS: Record<ColumnId, ColumnDef> = {
     id: 'degree',
     label: 'Degree / University',
     cellClassName: 'wrap-cell',
-    render: (rec) => `${rec.highestDegree}${rec.university ? `, ${rec.university}` : ''}`,
-    text: (rec) => `${rec.highestDegree}${rec.university ? `, ${rec.university}` : ''}`,
+    render: (rec) => `${formatDegree(rec.highestDegree, rec.pursuingPhd)}${rec.university ? `, ${rec.university}` : ''}`,
+    text: (rec) => `${formatDegree(rec.highestDegree, rec.pursuingPhd)}${rec.university ? `, ${rec.university}` : ''}`,
   },
   designation: {
     id: 'designation',
     label: 'Present Designation',
     sortKey: 'presentDesignation',
     cellClassName: 'wrap-cell',
-    render: (rec) => rec.presentDesignation,
-    text: (rec) => rec.presentDesignation,
+    render: (rec) => normalizeDesignation(rec.presentDesignation),
+    text: (rec) => normalizeDesignation(rec.presentDesignation),
   },
   joined: {
     id: 'joined',
@@ -155,7 +157,9 @@ export default function FacultyTable({
     if (departmentFilter !== 'All') {
       rows = rows.filter((r) => normalizeDepartment(r.alliedDepartment) === departmentFilter);
     }
-    if (designationFilter !== 'All') rows = rows.filter((r) => r.presentDesignation === designationFilter);
+    if (designationFilter !== 'All') {
+      rows = rows.filter((r) => normalizeDesignation(r.presentDesignation) === designationFilter);
+    }
     if (academicYearFilter !== 'All') {
       const startYear = Number(academicYearFilter);
       rows = rows.filter((r) => wasOnStaffDuringAcademicYear(r, startYear));
@@ -167,7 +171,7 @@ export default function FacultyTable({
           r.facultyName.toLowerCase().includes(q) ||
           r.alliedDepartment.toLowerCase().includes(q) ||
           r.panNo.toLowerCase().includes(q) ||
-          r.presentDesignation.toLowerCase().includes(q)
+          normalizeDesignation(r.presentDesignation).toLowerCase().includes(q)
       );
     }
     const sorted = [...rows].sort((a, b) => {
@@ -213,7 +217,7 @@ export default function FacultyTable({
   }, [records]);
 
   const designationOptions = useMemo(() => {
-    const set = new Set(records.map((r) => r.presentDesignation).filter(Boolean));
+    const set = new Set(records.map((r) => normalizeDesignation(r.presentDesignation)).filter(Boolean));
     return [...set].sort((a, b) => a.localeCompare(b));
   }, [records]);
 

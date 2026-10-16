@@ -18,6 +18,7 @@ export const emptyRecord: FacultyRecord = {
   contractBasis: '',
   currentlyAssociated: 'Y',
   dateOfLeaving: '',
+  pursuingPhd: false,
 };
 
 export const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;

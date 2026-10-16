@@ -39,29 +39,29 @@ export function printRecords(records: FacultyRecord[], columns: PrintColumn[], t
     margin: 0;
   }
   h1 {
-    font-size: 18px;
+    font-size: 20px;
     margin: 0 0 4px;
   }
   .meta {
-    font-size: 12px;
+    font-size: 13px;
     color: #666;
     margin-bottom: 18px;
   }
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 11px;
+    font-size: 12.5px;
   }
   th, td {
     border: 1px solid #ccc;
-    padding: 6px 8px;
+    padding: 7px 10px;
     text-align: left;
     vertical-align: top;
   }
   th {
     background: #f1eee4;
     text-transform: uppercase;
-    font-size: 10px;
+    font-size: 11.5px;
     letter-spacing: 0.03em;
   }
   tbody tr:nth-child(even) {

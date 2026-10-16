@@ -1,5 +1,7 @@
 import * as XLSX from 'xlsx';
 import { FACULTY_COLUMNS, type AssociationNature, type ContractBasis, type FacultyRecord, type YesNo } from './types';
+import { normalizeDesignation } from './designationUtils';
+import { formatDegree, parseDegree } from './degreeUtils';
 
 export interface ParsedRow {
   rowNumber: number; // 1-indexed, matches spreadsheet row (including header row offset)
@@ -67,6 +69,7 @@ const HEADER_ALIASES: Record<keyof FacultyRecord, string[]> = {
     'convocation date',
     'degree completion date',
   ],
+  pursuingPhd: ['pursuing phd', 'pursuing ph.d.', 'pursuing ph.d'],
   id: [],
 };
 
@@ -143,7 +146,7 @@ function excelDateToISO(value: unknown): string {
     if (m) return toISO(+m[1], +m[2], +m[3]);
 
     // numeric dd/mm/yyyy, dd-mm-yyyy, dd.mm.yyyy (2 or 4 digit year)
-    m = s.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})$/);
+    m = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})$/);
     if (m) return toISO(+m[3], +m[2], +m[1]);
 
     // "4 Aug 2021", "4 August 2021", "04-Aug-2021", "04 Aug, 2021"
@@ -275,8 +278,18 @@ export async function parseFacultyExcel(file: File): Promise<ParseResult> {
         case 'experienceYears':
           rec.experienceYears = String(cell ?? '').trim();
           break;
-        case 'panNo':
-          rec.panNo = String(cell ?? '').trim().toUpperCase();
+        case 'highestDegree': {
+          const { baseDegree, pursuingPhd } = parseDegree(String(cell ?? ''));
+          rec.highestDegree = formatDegree(baseDegree, pursuingPhd);
+          rec.pursuingPhd = pursuingPhd;
+          break;
+        }
+        case 'presentDesignation':
+        case 'designationAtJoining':
+          rec[key] = normalizeDesignation(String(cell ?? ''));
+          break;
+        case 'pursuingPhd':
+          rec.pursuingPhd = ['y', 'yes', 'true', '1'].includes(String(cell ?? '').trim().toLowerCase());
           break;
         default:
           (rec[key] as string) = String(cell ?? '').trim();

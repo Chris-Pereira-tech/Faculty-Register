@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import './App.css';
-import { db } from './db';
+import { db, sanitizeFacultyDatabase } from './db';
 import type { FacultyRecord } from './types';
 import { isUnlocked, lock } from './auth';
 import FacultyForm from './components/FacultyForm';
@@ -16,6 +16,10 @@ function App() {
   const [tab, setTab] = useState<Tab>('add');
   const [editingRecord, setEditingRecord] = useState<FacultyRecord | null>(null);
   const records = useLiveQuery(() => db.faculty.toArray(), []) ?? [];
+
+  useEffect(() => {
+    sanitizeFacultyDatabase();
+  }, []);
 
   if (!unlocked) {
     return <LoginGate onUnlock={() => setUnlocked(true)} />;
