@@ -278,6 +278,23 @@ export default function FacultyTable({
   const allFilteredSelected = filtered.length > 0 && filtered.every((r) => r.id != null && selected.has(r.id));
   const someFilteredSelected = filtered.some((r) => r.id != null && selected.has(r.id));
 
+  const hasActiveFilters =
+    Boolean(query.trim()) ||
+    natureFilter !== 'All' ||
+    activeFilter !== 'All' ||
+    departmentFilter !== 'All' ||
+    designationFilter !== 'All' ||
+    academicYearFilter !== 'All';
+
+  function handleResetFilters() {
+    setQuery('');
+    setNatureFilter('All');
+    setActiveFilter('All');
+    setDepartmentFilter('All');
+    setDesignationFilter('All');
+    setAcademicYearFilter('All');
+  }
+
   function toggleRow(id: number | undefined) {
     if (id == null) return;
     setSelected((prev) => {
@@ -408,6 +425,17 @@ export default function FacultyTable({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
+          {query && (
+            <button
+              type="button"
+              className="search-clear-btn"
+              onClick={() => setQuery('')}
+              title="Clear search"
+              aria-label="Clear search input"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         <div className="filter-chip-group">
@@ -478,6 +506,16 @@ export default function FacultyTable({
         </select>
 
         <div className="toolbar-right">
+          {hasActiveFilters && (
+            <button
+              type="button"
+              className="btn btn--ghost btn--filter-reset"
+              onClick={handleResetFilters}
+              title="Reset all search and filter options"
+            >
+              Clear filters ({filtered.length} of {records.length})
+            </button>
+          )}
           {selected.size > 0 && (
             <button className="btn btn--ghost btn--danger" onClick={handleBulkDelete}>
               Delete selected ({selected.size})
@@ -561,7 +599,22 @@ export default function FacultyTable({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((rec) => (
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={orderedColumns.length + 2} className="empty-table-cell">
+                  <div className="empty-state" style={{ padding: '40px 16px' }}>
+                    <h3>No matching faculty found</h3>
+                    <p>No records match your active search query or filter selection.</p>
+                    {hasActiveFilters && (
+                      <button type="button" className="btn btn--primary" onClick={handleResetFilters}>
+                        Reset all filters
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filtered.map((rec) => (
               <tr key={rec.id} className={rec.id != null && selected.has(rec.id) ? 'selected' : ''}>
                 <td className="checkbox-col">
                   <input
@@ -587,7 +640,8 @@ export default function FacultyTable({
                   </div>
                 </td>
               </tr>
-            ))}
+            )))
+          }
           </tbody>
         </table>
       </div>

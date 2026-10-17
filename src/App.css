@@ -365,6 +365,18 @@
   background: var(--rust-soft);
 }
 
+.btn--filter-reset {
+  color: var(--ink);
+  border-color: var(--brass);
+  background: var(--brass-soft);
+  font-weight: 500;
+}
+
+.btn--filter-reset:hover {
+  background: var(--brass);
+  color: #ffffff;
+}
+
 /* ---------- Register / table ---------- */
 .register-toolbar {
   display: flex;
@@ -421,7 +433,7 @@
 
 .search-box input {
   width: 85%;
-  padding: 10px 14px 10px 36px;
+  padding: 10px 34px 10px 36px;
   border: 1px solid var(--line);
   border-radius: 5px;
   font-size: 14.5px;
@@ -434,6 +446,26 @@
   top: 50%;
   transform: translateY(-50%);
   opacity: 0.5;
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: calc(15% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 6px;
+  line-height: 1;
+  border-radius: 4px;
+}
+
+.search-clear-btn:hover {
+  color: var(--ink);
+  background: var(--brass-soft);
 }
 
 .filter-chip-group {
@@ -761,6 +793,11 @@ table.ledger th.wrap-col {
 .empty-state p {
   margin: 0 0 20px;
   font-size: 15px;
+}
+
+.empty-table-cell {
+  text-align: center;
+  background: var(--paper-raised);
 }
 
 .toolbar-right {
