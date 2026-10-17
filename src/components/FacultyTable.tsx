@@ -5,7 +5,7 @@ import { exportToExcel } from '../export';
 import { printRecords } from '../print';
 import { normalizeDepartment } from '../departmentUtils';
 import { normalizeDesignation } from '../designationUtils';
-import { formatDegree } from '../degreeUtils';
+import { formatDegree, isPhdDegree } from '../degreeUtils';
 import { getAcademicYearBounds, wasOnStaffDuringAcademicYear } from '../dateUtils';
 import StatusStamp from './StatusStamp';
 
@@ -131,9 +131,10 @@ export default function FacultyTable({
     department?: string;
     designation?: string;
     status?: 'All' | 'Y' | 'N';
+    query?: string;
   } | null;
 }) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialFilters?.query ?? '');
   const [natureFilter, setNatureFilter] = useState<AssociationNature | 'All'>('All');
   const [activeFilter, setActiveFilter] = useState<'All' | 'Y' | 'N'>(initialFilters?.status ?? 'All');
   const [departmentFilter, setDepartmentFilter] = useState(initialFilters?.department ?? 'All');
@@ -152,6 +153,7 @@ export default function FacultyTable({
       if (initialFilters.department !== undefined) setDepartmentFilter(initialFilters.department);
       if (initialFilters.designation !== undefined) setDesignationFilter(initialFilters.designation);
       if (initialFilters.status !== undefined) setActiveFilter(initialFilters.status);
+      if (initialFilters.query !== undefined) setQuery(initialFilters.query);
     }
   }, [initialFilters]);
 
@@ -180,11 +182,18 @@ export default function FacultyTable({
     }
     if (query.trim()) {
       const q = query.trim().toLowerCase();
+      const qIsPhd = q === 'phd' || q === 'ph.d' || q === 'ph.d.' || q === 'doctorate';
+      const qIsPursuing = q === 'pursuing' || q.includes('pursuing');
       rows = rows.filter(
         (r) =>
           r.facultyName.toLowerCase().includes(q) ||
           r.alliedDepartment.toLowerCase().includes(q) ||
           r.panNo.toLowerCase().includes(q) ||
+          (qIsPhd
+            ? isPhdDegree(r.highestDegree)
+            : qIsPursuing
+            ? (Boolean(r.pursuingPhd) || r.highestDegree.toLowerCase().includes('pursuing'))
+            : r.highestDegree.toLowerCase().includes(q)) ||
           normalizeDesignation(r.presentDesignation).toLowerCase().includes(q)
       );
     }

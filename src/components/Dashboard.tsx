@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { FacultyRecord } from '../types';
 import { normalizeDepartment } from '../departmentUtils';
 import { normalizeDesignation } from '../designationUtils';
-import { parseDegree } from '../degreeUtils';
+import { isPhdDegree, parseDegree } from '../degreeUtils';
 import { calcExperienceYears } from '../dateUtils';
 
 interface DashboardProps {
@@ -11,6 +11,7 @@ interface DashboardProps {
     department?: string;
     designation?: string;
     status?: 'All' | 'Y' | 'N';
+    query?: string;
   }) => void;
 }
 
@@ -50,16 +51,18 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
     let other = 0;
 
     evalRecords.forEach((r) => {
-      const { baseDegree, pursuingPhd } = parseDegree(r.highestDegree);
-      const isPursuing = r.pursuingPhd ?? pursuingPhd;
-      if (baseDegree === 'PhD') {
+      if (isPhdDegree(r.highestDegree)) {
         phd++;
-      } else if (isPursuing) {
-        pursuing++;
-      } else if (baseDegree === 'ME') {
-        me++;
       } else {
-        other++;
+        const { baseDegree, pursuingPhd } = parseDegree(r.highestDegree);
+        const isPursuing = r.pursuingPhd ?? pursuingPhd;
+        if (isPursuing) {
+          pursuing++;
+        } else if (baseDegree === 'ME') {
+          me++;
+        } else {
+          other++;
+        }
       }
     });
 
@@ -182,10 +185,13 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
 
       // When activeOnly is toggled, compute sub-metrics according to current evaluation mode
       if (!activeOnly || isActive) {
-        const { baseDegree, pursuingPhd } = parseDegree(r.highestDegree);
-        const isPursuing = r.pursuingPhd ?? pursuingPhd;
-        if (baseDegree === 'PhD') entry.phd++;
-        else if (isPursuing) entry.pursuing++;
+        if (isPhdDegree(r.highestDegree)) {
+          entry.phd++;
+        } else {
+          const { pursuingPhd } = parseDegree(r.highestDegree);
+          const isPursuing = r.pursuingPhd ?? pursuingPhd;
+          if (isPursuing) entry.pursuing++;
+        }
 
         const norm = normalizeDesignation(r.presentDesignation);
         if (norm === 'Associate Professor') entry.assoc++;
@@ -236,7 +242,7 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           <div>
             <h2 className="dashboard-title">Institutional Faculty Overview</h2>
             <p className="dashboard-subtitle">
-              Live staffing metrics, doctoral ratios, cadre balance, and department analytics.
+              Live staffing metrics, Ph.D. ratios, cadre balance, and department analytics.
             </p>
           </div>
           <div className="dashboard-controls">
@@ -322,18 +328,19 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           </div>
         </div>
 
-        {/* Card 2: Doctorates (Ph.D.) */}
+        {/* Card 2: Ph.D. Holders */}
         <div
           className="kpi-card"
           onClick={() =>
             onNavigateToRegister({
               department: selectedDept !== 'All' ? selectedDept : undefined,
               status: activeOnly ? 'Y' : 'All',
+              query: 'PhD',
             })
           }
           role="button"
           tabIndex={0}
-          title="Doctoral qualified faculty"
+          title="Click to view Ph.D. holders in register"
         >
           <div className="kpi-card__header">
             <span className="kpi-label">Ph.D. Holders</span>
@@ -341,7 +348,7 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           </div>
           <div className="kpi-value">{qualificationStats.phd}</div>
           <div className="kpi-foot">
-            <span>Doctoral cadre strength</span>
+            <span>Faculty with Ph.D.</span>
             <span className="kpi-foot-sub">{evalRecords.length - qualificationStats.phd} non-Ph.D.</span>
           </div>
         </div>
@@ -353,11 +360,12 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
             onNavigateToRegister({
               department: selectedDept !== 'All' ? selectedDept : undefined,
               status: activeOnly ? 'Y' : 'All',
+              query: 'pursuing',
             })
           }
           role="button"
           tabIndex={0}
-          title="Faculty currently enrolled in Ph.D. programs"
+          title="Click to view faculty pursuing Ph.D. in register"
         >
           <div className="kpi-card__header">
             <span className="kpi-label">Pursuing Ph.D.</span>
@@ -365,7 +373,7 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           </div>
           <div className="kpi-value">{qualificationStats.pursuing}</div>
           <div className="kpi-foot">
-            <span>Enrolled in doctoral studies</span>
+            <span>Enrolled in Ph.D. programs</span>
             <span className="kpi-foot-sub">M.E. qualification</span>
           </div>
         </div>
@@ -453,10 +461,22 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           </div>
 
           <div className="breakdown-list">
-            <div className="breakdown-row">
+            <div
+              className="breakdown-row clickable"
+              onClick={() =>
+                onNavigateToRegister({
+                  department: selectedDept !== 'All' ? selectedDept : undefined,
+                  status: activeOnly ? 'Y' : 'All',
+                  query: 'PhD',
+                })
+              }
+              role="button"
+              tabIndex={0}
+              title="Click to view Ph.D. holders in register"
+            >
               <div className="breakdown-label">
                 <span className="legend-dot segment--phd" />
-                <span>Doctorates (Ph.D.)</span>
+                <span>Ph.D.</span>
               </div>
               <div className="breakdown-stat">
                 <strong>{qualificationStats.phd}</strong>
@@ -464,7 +484,19 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
               </div>
             </div>
 
-            <div className="breakdown-row">
+            <div
+              className="breakdown-row clickable"
+              onClick={() =>
+                onNavigateToRegister({
+                  department: selectedDept !== 'All' ? selectedDept : undefined,
+                  status: activeOnly ? 'Y' : 'All',
+                  query: 'pursuing',
+                })
+              }
+              role="button"
+              tabIndex={0}
+              title="Click to view faculty pursuing Ph.D. in register"
+            >
               <div className="breakdown-label">
                 <span className="legend-dot segment--pursuing" />
                 <span>M.E. (Pursuing Ph.D.)</span>
@@ -475,7 +507,19 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
               </div>
             </div>
 
-            <div className="breakdown-row">
+            <div
+              className="breakdown-row clickable"
+              onClick={() =>
+                onNavigateToRegister({
+                  department: selectedDept !== 'All' ? selectedDept : undefined,
+                  status: activeOnly ? 'Y' : 'All',
+                  query: 'ME',
+                })
+              }
+              role="button"
+              tabIndex={0}
+              title="Click to view M.E. faculty in register"
+            >
               <div className="breakdown-label">
                 <span className="legend-dot segment--me" />
                 <span>M.E.</span>
@@ -700,7 +744,7 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
                     {d.total > d.active && <span className="hint"> ({d.total} total)</span>}
                   </td>
                   <td>
-                    <span className="stamp stamp--brass">{d.phd} ({d.phdPct}%)</span>
+                    <span className="stamp stamp--brass">{d.phd} Ph.D. ({d.phdPct}%)</span>
                   </td>
                   <td>
                     <span className="stamp stamp--blue">{d.pursuing}</span>

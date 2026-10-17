@@ -20,6 +20,7 @@ function App() {
     department?: string;
     designation?: string;
     status?: 'All' | 'Y' | 'N';
+    query?: string;
   } | null>(null);
   const records = useLiveQuery(() => db.faculty.toArray(), []) ?? [];
 
@@ -53,6 +54,7 @@ function App() {
     department?: string;
     designation?: string;
     status?: 'All' | 'Y' | 'N';
+    query?: string;
   }) {
     setRegisterFilters(filters ?? null);
     setTab('register');
