@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { db } from '../db';
 import { parseFacultyExcel, type ParsedRow } from '../import';
-import { validateRecord } from '../validation';
+import { validateImportRecord } from '../validation';
 import type { FacultyRecord } from '../types';
 
 const FIELD_LABELS: Partial<Record<keyof FacultyRecord, string>> = {
@@ -16,7 +16,7 @@ const FIELD_LABELS: Partial<Record<keyof FacultyRecord, string>> = {
 };
 
 interface PreviewRow extends ParsedRow {
-  errors: ReturnType<typeof validateRecord>;
+  errors: ReturnType<typeof validateImportRecord>;
   include: boolean;
 }
 
@@ -52,8 +52,8 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
         return;
       }
       const rows: PreviewRow[] = result.rows.map((r) => {
-        const errors = validateRecord(r.record);
-        return { ...r, errors, include: Object.keys(errors).length === 0 };
+        const errors = validateImportRecord(r.record);
+        return { ...r, errors, include: true };
       });
       setPreview(rows);
       setUnmatchedHeaders(result.unmatchedHeaders);
@@ -76,19 +76,17 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
     setPreview((prev) => prev && prev.map((r, i) => (i === idx ? { ...r, include: !r.include } : r)));
   }
 
-  function toggleAllValid() {
+  function toggleSelectAll() {
     setPreview((prev) => {
       if (!prev) return prev;
-      const anyIncluded = prev.some((r) => Object.keys(r.errors).length === 0 && r.include);
-      return prev.map((r) =>
-        Object.keys(r.errors).length === 0 ? { ...r, include: !anyIncluded } : r
-      );
+      const allIncluded = prev.every((r) => r.include);
+      return prev.map((r) => ({ ...r, include: !allIncluded }));
     });
   }
 
   async function handleImport() {
     if (!preview) return;
-    const toImport = preview.filter((r) => r.include && Object.keys(r.errors).length === 0);
+    const toImport = preview.filter((r) => r.include);
     if (toImport.length === 0) return;
     await db.faculty.bulkAdd(toImport.map((r) => r.record));
     setImportMsg(`Imported ${toImport.length} record${toImport.length === 1 ? '' : 's'} into the register.`);
@@ -97,7 +95,6 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
     onImported();
   }
 
-  const validCount = preview?.filter((r) => Object.keys(r.errors).length === 0).length ?? 0;
   const includedCount = preview?.filter((r) => r.include).length ?? 0;
 
   return (
@@ -144,11 +141,15 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
         {importMsg && <p className="status-msg" style={{ marginTop: 10 }}>{importMsg}</p>}
 
         {preview && (
-          <p className="hint" style={{ marginTop: 10 }}>
-            Detected header row {headerRowNumber} · matched {matchedCount} column
-            {matchedCount === 1 ? '' : 's'}
-            {unmatchedHeaders.length > 0 && <> · ignored: {unmatchedHeaders.join(', ')}</>}
-          </p>
+          <div style={{ marginTop: 10 }}>
+            <p className="hint">
+              Detected header row {headerRowNumber} · matched {matchedCount} of 16 columns
+              {matchedCount < 16 && (
+                <> · <em>Missing columns will be imported with blank/default values into the register.</em></>
+              )}
+              {unmatchedHeaders.length > 0 && <> · Unrecognized: {unmatchedHeaders.join(', ')}</>}
+            </p>
+          </div>
         )}
       </div>
 
@@ -156,12 +157,12 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
         <>
           <div className="register-toolbar">
             <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-              {preview.length} row{preview.length === 1 ? '' : 's'} found · {validCount} valid ·{' '}
+              {preview.length} row{preview.length === 1 ? '' : 's'} found ·{' '}
               {includedCount} selected for import
             </span>
             <div className="toolbar-right">
-              <button className="btn btn--ghost" onClick={toggleAllValid}>
-                Toggle all valid rows
+              <button className="btn btn--ghost" onClick={toggleSelectAll}>
+                {includedCount === preview.length ? 'Deselect all' : 'Select all'}
               </button>
               <button className="btn" disabled={includedCount === 0} onClick={handleImport}>
                 Import {includedCount || ''} record{includedCount === 1 ? '' : 's'}
@@ -173,7 +174,14 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
             <table className="ledger">
               <thead>
                 <tr>
-                  <th className="checkbox-col"></th>
+                  <th className="checkbox-col">
+                    <input
+                      type="checkbox"
+                      checked={preview.length > 0 && preview.every((r) => r.include)}
+                      onChange={toggleSelectAll}
+                      aria-label="Select all rows"
+                    />
+                  </th>
                   <th>Row</th>
                   <th>Name</th>
                   <th>Department</th>
@@ -185,15 +193,15 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
               <tbody>
                 {preview.map((row, idx) => {
                   const errorKeys = Object.keys(row.errors);
-                  const isValid = errorKeys.length === 0;
+                  const isClean = errorKeys.length === 0;
                   return (
                     <tr key={idx} className={row.include ? 'selected' : ''}>
                       <td className="checkbox-col">
                         <input
                           type="checkbox"
                           checked={row.include}
-                          disabled={!isValid}
                           onChange={() => toggleRow(idx)}
+                          aria-label={`Select row ${row.rowNumber}`}
                         />
                       </td>
                       <td className="mono">{row.rowNumber}</td>
@@ -202,12 +210,12 @@ export default function ImportPanel({ onImported }: { onImported: () => void }) 
                       <td className="mono">{row.record.panNo || '—'}</td>
                       <td>{row.record.presentDesignation || '—'}</td>
                       <td className="status-cell">
-                        {isValid ? (
+                        {isClean ? (
                           <span className="status-dot">Ready</span>
                         ) : (
                           <div>
                             <span className="status-dot inactive">
-                              {errorKeys.length} issue{errorKeys.length === 1 ? '' : 's'}
+                              {errorKeys.length} notice{errorKeys.length === 1 ? '' : 's'}
                             </span>
                             <div className="row-error-list">
                               {Object.entries(row.errors).map(([field, msg]) => (
