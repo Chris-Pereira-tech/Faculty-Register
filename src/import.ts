@@ -2,6 +2,8 @@ import * as XLSX from 'xlsx';
 import { FACULTY_COLUMNS, type AssociationNature, type ContractBasis, type FacultyRecord, type YesNo } from './types';
 import { normalizeDesignation } from './designationUtils';
 import { formatDegree, parseDegree } from './degreeUtils';
+import { normalizeDepartment } from './departmentUtils';
+import { calcExperienceYears } from './dateUtils';
 
 export interface ParsedRow {
   rowNumber: number; // 1-indexed, matches spreadsheet row (including header row offset)
@@ -19,48 +21,121 @@ export interface ParseResult {
 // Aliases so re-uploads of exported files, or lightly-renamed institutional
 // sheets, still match without requiring an exact header string.
 const HEADER_ALIASES: Record<keyof FacultyRecord, string[]> = {
-  alliedDepartment: ['allied department name', 'department', 'allied dept'],
-  facultyName: ['name of the faculty', 'faculty name', 'name'],
-  panNo: ['pan no.', 'pan no', 'pan'],
-  apaarId: ['apaar faculty id (if any)', 'apaar faculty id', 'apaar id'],
-  highestDegree: ['highest degree', 'degree'],
-  university: ['university'],
-  specialization: ['area of specialization', 'specialization'],
+  alliedDepartment: [
+    'allied department name',
+    'allied department',
+    'department',
+    'allied dept',
+    'dept',
+    'dept name',
+    'department name',
+    'branch',
+    'stream',
+  ],
+  facultyName: [
+    'name of the faculty',
+    'faculty name',
+    'name of faculty',
+    'name',
+    'faculty',
+    'employee name',
+    'staff name',
+    'teacher name',
+    'full name',
+    'fullname',
+    'professor name',
+  ],
+  panNo: ['pan no.', 'pan no', 'pan', 'pan number', 'pan_no', 'pancard', 'pan card'],
+  apaarId: ['apaar faculty id (if any)', 'apaar faculty id', 'apaar id', 'apaar', 'apaar no', 'apaar number', 'apaar_id'],
+  highestDegree: [
+    'highest degree',
+    'degree',
+    'qualification',
+    'highest qualification',
+    'educational qualification',
+    'degree qualification',
+  ],
+  university: ['university', 'university / institution', 'university/board', 'college', 'institution', 'institute', 'board'],
+  specialization: ['area of specialization', 'specialization', 'specialisation', 'area of specialisation', 'subject', 'discipline'],
   dateOfJoiningInstitution: [
     'date of joining in this institution',
     'date of joining',
     'joining date',
+    'doj',
+    'date of join',
+    'joined date',
+    'date of joining current institute',
+    'date of joining the institute',
   ],
   experienceYears: [
     'experience in years in current institute',
+    'experience in years',
     'experience (years)',
     'experience',
+    'exp (years)',
+    'exp',
+    'total experience',
+    'years of experience',
   ],
   designationAtJoining: [
     'designation at time of joining in this institution',
     'designation at time of joining',
     'designation at joining',
+    'initial designation',
+    'joining designation',
   ],
-  presentDesignation: ['present designation'],
+  presentDesignation: [
+    'present designation',
+    'designation',
+    'current designation',
+    'post',
+    'role',
+    'present desig',
+    'designation name',
+  ],
   professorDesignationDate: [
     'the date on which designated as professor / associate professor if any',
     'date designated as professor',
     'professor designation date',
+    'date of promotion',
+    'promotion date',
+    'date of designation as prof',
+    'date designated as professor / associate professor',
   ],
   associationNature: [
     'nature of association (regular / contract / ad hoc)',
     'nature of association',
     'association',
+    'nature',
+    'appointment type',
+    'employment type',
+    'regular / contract',
   ],
   contractBasis: [
     'if contractual mention full time or part time / hourly based',
     'contract basis',
     'full time / part time',
+    'basis',
+    'contract type',
   ],
-  currentlyAssociated: ['currently associated (y/n)', 'currently associated'],
+  currentlyAssociated: [
+    'currently associated (y/n)',
+    'currently associated',
+    'currently working',
+    'active status',
+    'status',
+    'is active',
+    'active',
+  ],
   dateOfLeaving: [
     'date of leaving if any (in case currently associated is no)',
     'date of leaving',
+    'leaving date',
+    'relieving date',
+    'dol',
+    'date of exit',
+    'resignation date',
+    'date of leaving if any',
   ],
   degreeCompletionDate: [
     'date of completion of degree (as per convocation)',
@@ -68,13 +143,40 @@ const HEADER_ALIASES: Record<keyof FacultyRecord, string[]> = {
     'date of completion (as per convocation)',
     'convocation date',
     'degree completion date',
+    'passing date',
+    'year of passing',
+    'passing year',
   ],
-  pursuingPhd: ['pursuing phd', 'pursuing ph.d.', 'pursuing ph.d'],
+  pursuingPhd: ['pursuing phd', 'pursuing ph.d.', 'pursuing ph.d', 'phd pursuing', 'ph.d pursuing', 'pursuing'],
   id: [],
 };
 
 function normalizeHeader(h: string): string {
   return h.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function matchAlias(headerRaw: string, aliases: string[]): boolean {
+  const norm = normalizeHeader(headerRaw);
+  if (!norm) return false;
+  const clean = norm.replace(/\s*\([^)]*\)/g, '').trim();
+  const alphaRaw = norm.replace(/[^a-z0-9]/g, '');
+  const alphaClean = clean.replace(/[^a-z0-9]/g, '');
+
+  return aliases.some((a) => {
+    const normA = normalizeHeader(a);
+    const cleanA = normA.replace(/\s*\([^)]*\)/g, '').trim();
+    const alphaA = normA.replace(/[^a-z0-9]/g, '');
+    const alphaCleanA = cleanA.replace(/[^a-z0-9]/g, '');
+
+    return (
+      norm === normA ||
+      clean === normA ||
+      clean === cleanA ||
+      alphaRaw === alphaA ||
+      alphaClean === alphaA ||
+      alphaClean === alphaCleanA
+    );
+  });
 }
 
 function buildHeaderMap(headers: string[]): { map: Map<number, keyof FacultyRecord>; unmatched: string[] } {
@@ -88,7 +190,7 @@ function buildHeaderMap(headers: string[]): { map: Map<number, keyof FacultyReco
     for (const key of Object.keys(HEADER_ALIASES) as (keyof FacultyRecord)[]) {
       if (key === 'id') continue;
       const aliases = HEADER_ALIASES[key];
-      if (aliases.some((a) => normalizeHeader(a) === norm)) {
+      if (matchAlias(raw, aliases)) {
         matchedKey = key;
         break;
       }
@@ -161,6 +263,14 @@ function excelDateToISO(value: unknown): string {
       return toISO(+m[3], MONTH_NAMES[m[1].toLowerCase()], +m[2]);
     }
 
+    // 4-digit year only: "2021"
+    m = s.match(/^(\d{4})$/);
+    if (m) return `${m[1]}-01-01`;
+
+    // Month and year: "08/2021", "08-2021"
+    m = s.match(/^(\d{1,2})[/.-](\d{4})$/);
+    if (m) return toISO(+m[2], +m[1], 1);
+
     // last resort: let the browser try (assumes local time, not UTC)
     const parsedDate = new Date(s);
     if (!isNaN(parsedDate.getTime())) {
@@ -172,8 +282,10 @@ function excelDateToISO(value: unknown): string {
 
 function normalizeAssociationNature(value: unknown): AssociationNature {
   const s = String(value ?? '').toLowerCase().replace(/[\s-]/g, '');
-  if (s.includes('regular')) return 'Regular';
-  if (s.includes('contract') || s.includes('adhoc')) return 'Contract / Ad hoc';
+  if (s.includes('regular') || s.includes('permanent')) return 'Regular';
+  if (s.includes('contract') || s.includes('adhoc') || s.includes('temporary') || s.includes('visiting')) {
+    return 'Contract / Ad hoc';
+  }
   return 'Regular';
 }
 
@@ -186,7 +298,7 @@ function normalizeContractBasis(value: unknown): ContractBasis {
 
 function normalizeYesNo(value: unknown): YesNo {
   const s = String(value ?? '').trim().toLowerCase();
-  if (['n', 'no', 'false', '0'].includes(s)) return 'N';
+  if (['n', 'no', 'false', '0', 'left', 'relieved', 'resigned', 'inactive'].includes(s)) return 'N';
   return 'Y';
 }
 
@@ -260,6 +372,12 @@ export async function parseFacultyExcel(file: File): Promise<ParseResult> {
     map.forEach((key, colIdx) => {
       const cell = dataRow[colIdx];
       switch (key) {
+        case 'alliedDepartment':
+          rec.alliedDepartment = normalizeDepartment(String(cell ?? '').trim());
+          break;
+        case 'panNo':
+          rec.panNo = String(cell ?? '').trim().toUpperCase();
+          break;
         case 'dateOfJoiningInstitution':
         case 'professorDesignationDate':
         case 'dateOfLeaving':
@@ -279,22 +397,30 @@ export async function parseFacultyExcel(file: File): Promise<ParseResult> {
           rec.experienceYears = String(cell ?? '').trim();
           break;
         case 'highestDegree': {
-          const { baseDegree, pursuingPhd } = parseDegree(String(cell ?? ''));
-          rec.highestDegree = formatDegree(baseDegree, pursuingPhd);
-          rec.pursuingPhd = pursuingPhd;
+          const rawDeg = String(cell ?? '').trim();
+          if (rawDeg) {
+            const { baseDegree, pursuingPhd } = parseDegree(rawDeg);
+            rec.highestDegree = formatDegree(baseDegree, pursuingPhd);
+            rec.pursuingPhd = pursuingPhd;
+          }
           break;
         }
         case 'presentDesignation':
         case 'designationAtJoining':
-          rec[key] = normalizeDesignation(String(cell ?? ''));
+          rec[key] = normalizeDesignation(String(cell ?? '').trim());
           break;
         case 'pursuingPhd':
-          rec.pursuingPhd = ['y', 'yes', 'true', '1'].includes(String(cell ?? '').trim().toLowerCase());
+          rec.pursuingPhd = ['y', 'yes', 'true', '1', 'pursuing'].includes(String(cell ?? '').trim().toLowerCase());
           break;
         default:
           (rec[key] as string) = String(cell ?? '').trim();
       }
     });
+
+    // Auto-calculate experience if joining date was provided but experience column was missing
+    if (!rec.experienceYears && rec.dateOfJoiningInstitution) {
+      rec.experienceYears = calcExperienceYears(rec.dateOfJoiningInstitution);
+    }
 
     rows.push({ rowNumber: r + 1, record: rec });
   }
