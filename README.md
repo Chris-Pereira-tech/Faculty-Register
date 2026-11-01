@@ -64,6 +64,10 @@ Then open the printed local URL (usually `http://localhost:5173`).
   filtered/visible rows to a `.xlsx` file with the exact same column headers
   and order as the source table, ready to paste into the institutional
   submission format.
+- **Dark Mode toggle** — instant toggle between light and dark themes using
+  native `color-scheme` metadata, semantic theme tokens, and FOUC prevention.
+  Persists in `localStorage` with cross-tab synchronization and automatic OS
+  preference detection.
 
 ## Login / password gate
 
