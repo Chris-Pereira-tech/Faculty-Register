@@ -17,6 +17,11 @@ Then open the printed local URL (usually `http://localhost:5173`).
 
 ## How it works
 
+- **Dashboard** — real-time executive analytics console summarizing staffing
+  strength, Ph.D. terminal credential mix, cadre hierarchy, institutional
+  experience, and cross-department comparative metrics. Features an interactive
+  SVG donut chart, cadre target ratio progress bars, experience retention bands,
+  and direct navigation back into filtered register views.
 - **Add record** — a sectioned form (Identity / Academic background /
   Employment / Association status). Nearly every field is required — shown
   with a red border and message if the form is submitted incomplete — with
