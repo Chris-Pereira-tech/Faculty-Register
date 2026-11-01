@@ -15,6 +15,130 @@ interface DashboardProps {
   }) => void;
 }
 
+function getDepartmentCode(name: string): string {
+  const norm = normalizeDepartment(name);
+  if (norm === 'Computer Engineering') return 'CE';
+  if (norm === 'Computer Science Engineering') return 'CSE';
+  if (norm === 'Electronics and Computer Science') return 'ECS';
+  if (norm === 'Mechanical') return 'MECH';
+  const words = norm.split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    return words.map((w) => w[0].toUpperCase()).join('').slice(0, 4);
+  }
+  return norm.slice(0, 4).toUpperCase();
+}
+
+function DonutChart({
+  phd,
+  pursuing,
+  me,
+  other,
+  total,
+  phdPct,
+}: {
+  phd: number;
+  pursuing: number;
+  me: number;
+  other: number;
+  total: number;
+  phdPct: number;
+}) {
+  const r = 38;
+  const C = 2 * Math.PI * r; // ~238.761
+
+  if (total === 0) {
+    return (
+      <div className="donut-chart-wrap">
+        <svg viewBox="0 0 100 100" className="donut-svg">
+          <circle cx="50" cy="50" r={r} fill="transparent" stroke="var(--line)" strokeWidth="12" />
+          <text x="50" y="55" textAnchor="middle" className="donut-center-sub">0 Records</text>
+        </svg>
+      </div>
+    );
+  }
+
+  const phdLen = (phd / total) * C;
+  const pursuingLen = (pursuing / total) * C;
+  const meLen = (me / total) * C;
+  const otherLen = (other / total) * C;
+
+  const phdOffset = 0;
+  const pursuingOffset = phdLen;
+  const meOffset = phdLen + pursuingLen;
+  const otherOffset = phdLen + pursuingLen + meLen;
+
+  return (
+    <div className="donut-chart-wrap">
+      <svg viewBox="0 0 100 100" className="donut-svg">
+        <circle cx="50" cy="50" r={r} fill="transparent" stroke="var(--paper-alt)" strokeWidth="12" />
+
+        {phd > 0 && (
+          <circle
+            cx="50"
+            cy="50"
+            r={r}
+            fill="transparent"
+            stroke="var(--brass)"
+            strokeWidth="12"
+            strokeDasharray={`${phdLen} ${C - phdLen}`}
+            strokeDashoffset={-phdOffset}
+            transform="rotate(-90 50 50)"
+          />
+        )}
+
+        {pursuing > 0 && (
+          <circle
+            cx="50"
+            cy="50"
+            r={r}
+            fill="transparent"
+            stroke="#2563eb"
+            strokeWidth="12"
+            strokeDasharray={`${pursuingLen} ${C - pursuingLen}`}
+            strokeDashoffset={-pursuingOffset}
+            transform="rotate(-90 50 50)"
+          />
+        )}
+
+        {me > 0 && (
+          <circle
+            cx="50"
+            cy="50"
+            r={r}
+            fill="transparent"
+            stroke="var(--green)"
+            strokeWidth="12"
+            strokeDasharray={`${meLen} ${C - meLen}`}
+            strokeDashoffset={-meOffset}
+            transform="rotate(-90 50 50)"
+          />
+        )}
+
+        {other > 0 && (
+          <circle
+            cx="50"
+            cy="50"
+            r={r}
+            fill="transparent"
+            stroke="var(--line-strong)"
+            strokeWidth="12"
+            strokeDasharray={`${otherLen} ${C - otherLen}`}
+            strokeDashoffset={-otherOffset}
+            transform="rotate(-90 50 50)"
+          />
+        )}
+
+        <text x="50" y="48" textAnchor="middle" className="donut-center-val">
+          {phdPct}%
+        </text>
+        <text x="50" y="61" textAnchor="middle" className="donut-center-sub">
+          Ph.D. Ratio
+        </text>
+      </svg>
+    </div>
+  );
+}
+
 export default function Dashboard({ records, onNavigateToRegister }: DashboardProps) {
   const [selectedDept, setSelectedDept] = useState<string>('All');
   const [activeOnly, setActiveOnly] = useState<boolean>(true);
@@ -183,7 +307,6 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
       const isActive = r.currentlyAssociated === 'Y';
       if (isActive) entry.active++;
 
-      // When activeOnly is toggled, compute sub-metrics according to current evaluation mode
       if (!activeOnly || isActive) {
         if (isPhdDegree(r.highestDegree)) {
           entry.phd++;
@@ -240,6 +363,9 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
       <div className="panel dashboard-header-panel">
         <div className="dashboard-header-row">
           <div>
+            <div className="dashboard-tag-row">
+              <span className="dashboard-tag">Faculty Analytics</span>
+            </div>
             <h2 className="dashboard-title">Institutional Faculty Overview</h2>
             <p className="dashboard-subtitle">
               Live staffing metrics, Ph.D. ratios, cadre balance, and department analytics.
@@ -248,19 +374,21 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           <div className="dashboard-controls">
             <div className="control-field">
               <label htmlFor="deptScope">Department</label>
-              <select
-                id="deptScope"
-                className="filter-select"
-                value={selectedDept}
-                onChange={(e) => setSelectedDept(e.target.value)}
-              >
-                <option value="All">All Departments ({records.length})</option>
-                {departmentOptions.map((dept) => (
-                  <option key={dept} value={dept}>
-                    {dept}
-                  </option>
-                ))}
-              </select>
+              <div className="select-wrapper">
+                <select
+                  id="deptScope"
+                  className="control-select"
+                  value={selectedDept}
+                  onChange={(e) => setSelectedDept(e.target.value)}
+                >
+                  <option value="All">All Departments ({records.length})</option>
+                  {departmentOptions.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="control-field">
@@ -272,7 +400,7 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
                   onClick={() => setActiveOnly(true)}
                   title="Include only currently associated faculty"
                 >
-                  Active ({activeCount})
+                  Active <span className="toggle-badge">{activeCount}</span>
                 </button>
                 <button
                   type="button"
@@ -280,14 +408,14 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
                   onClick={() => setActiveOnly(false)}
                   title="Include all faculty records, including left"
                 >
-                  All ({totalInScope})
+                  All <span className="toggle-badge">{totalInScope}</span>
                 </button>
               </div>
             </div>
 
             <button
               type="button"
-              className="btn btn--ghost"
+              className="btn btn--ghost action-header-btn"
               onClick={() =>
                 onNavigateToRegister({
                   department: selectedDept !== 'All' ? selectedDept : undefined,
@@ -318,10 +446,23 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           title="Click to view active faculty"
         >
           <div className="kpi-card__header">
-            <span className="kpi-label">Active Faculty</span>
+            <div className="kpi-card__header-left">
+              <div className="kpi-icon-wrap kpi-icon-wrap--green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <span className="kpi-label">Active Faculty</span>
+            </div>
             <span className="kpi-badge kpi-badge--green">{activeRate}% on staff</span>
           </div>
           <div className="kpi-value">{activeCount}</div>
+          <div className="kpi-bar-track">
+            <div className="kpi-bar-fill kpi-bar-fill--green" style={{ width: `${activeRate}%` }} />
+          </div>
           <div className="kpi-foot">
             <span>Total on file: <strong>{totalInScope}</strong></span>
             {leftCount > 0 && <span className="kpi-foot-sub">({leftCount} left)</span>}
@@ -343,10 +484,21 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           title="Click to view Ph.D. holders in register"
         >
           <div className="kpi-card__header">
-            <span className="kpi-label">Ph.D. Holders</span>
+            <div className="kpi-card__header-left">
+              <div className="kpi-icon-wrap kpi-icon-wrap--brass">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                  <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
+              </div>
+              <span className="kpi-label">Ph.D. Holders</span>
+            </div>
             <span className="kpi-badge kpi-badge--brass">{qualificationStats.phdPct}%</span>
           </div>
           <div className="kpi-value">{qualificationStats.phd}</div>
+          <div className="kpi-bar-track">
+            <div className="kpi-bar-fill kpi-bar-fill--brass" style={{ width: `${qualificationStats.phdPct}%` }} />
+          </div>
           <div className="kpi-foot">
             <span>Faculty with Ph.D.</span>
             <span className="kpi-foot-sub">{evalRecords.length - qualificationStats.phd} non-Ph.D.</span>
@@ -368,10 +520,21 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           title="Click to view faculty pursuing Ph.D. in register"
         >
           <div className="kpi-card__header">
-            <span className="kpi-label">Pursuing Ph.D.</span>
+            <div className="kpi-card__header-left">
+              <div className="kpi-icon-wrap kpi-icon-wrap--blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+              </div>
+              <span className="kpi-label">Pursuing Ph.D.</span>
+            </div>
             <span className="kpi-badge kpi-badge--blue">{qualificationStats.pursuingPct}%</span>
           </div>
           <div className="kpi-value">{qualificationStats.pursuing}</div>
+          <div className="kpi-bar-track">
+            <div className="kpi-bar-fill kpi-bar-fill--blue" style={{ width: `${qualificationStats.pursuingPct}%` }} />
+          </div>
           <div className="kpi-foot">
             <span>Enrolled in Ph.D. programs</span>
             <span className="kpi-foot-sub">M.E. qualification</span>
@@ -392,10 +555,20 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           title="Regular vs Contract faculty"
         >
           <div className="kpi-card__header">
-            <span className="kpi-label">Regular Faculty</span>
+            <div className="kpi-card__header-left">
+              <div className="kpi-icon-wrap kpi-icon-wrap--green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+              <span className="kpi-label">Regular Faculty</span>
+            </div>
             <span className="kpi-badge kpi-badge--green">{associationStats.regularPct}%</span>
           </div>
           <div className="kpi-value">{associationStats.regular}</div>
+          <div className="kpi-bar-track">
+            <div className="kpi-bar-fill kpi-bar-fill--green" style={{ width: `${associationStats.regularPct}%` }} />
+          </div>
           <div className="kpi-foot">
             <span>Contract / Ad hoc: <strong>{associationStats.contract}</strong></span>
           </div>
@@ -404,10 +577,24 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
         {/* Card 5: Average Experience */}
         <div className="kpi-card">
           <div className="kpi-card__header">
-            <span className="kpi-label">Avg. Retention</span>
+            <div className="kpi-card__header-left">
+              <div className="kpi-icon-wrap kpi-icon-wrap--gray">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+              </div>
+              <span className="kpi-label">Avg. Retention</span>
+            </div>
             <span className="kpi-badge kpi-badge--gray">{experienceStats.count} tracked</span>
           </div>
           <div className="kpi-value">{experienceStats.avg} <small className="kpi-unit">yrs</small></div>
+          <div className="kpi-bar-track">
+            <div
+              className="kpi-bar-fill kpi-bar-fill--gray"
+              style={{ width: `${Math.min(100, Math.round((parseFloat(experienceStats.avg) / 25) * 100))}%` }}
+            />
+          </div>
           <div className="kpi-foot">
             <span>Mean tenure in institution</span>
           </div>
@@ -416,136 +603,137 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
 
       {/* Analytics Rows */}
       <div className="dashboard-grid-two">
-        {/* Panel A: Qualification Profile */}
+        {/* Panel A: Qualification Profile with Donut & Breakdown */}
         <div className="panel chart-panel">
           <div className="chart-panel__header">
             <div>
-              <h3 className="chart-panel__title">Qualification Profile</h3>
-              <p className="chart-panel__sub">Highest degree credentials of evaluated faculty ({evalRecords.length})</p>
+              <h3 className="chart-panel__title">Highest Degree Distribution</h3>
+              <p className="chart-panel__sub">Academic qualification mix across faculty ({evalRecords.length})</p>
             </div>
             <span className="stat-pill-label">
               Total Ph.D. + Pursuing: <strong>{qualificationStats.phd + qualificationStats.pursuing}</strong>
             </span>
           </div>
 
-          {/* Visual Stacked Bar */}
-          <div className="stacked-bar">
-            {qualificationStats.phd > 0 && (
-              <div
-                className="stacked-bar__segment segment--phd"
-                style={{ width: `${(qualificationStats.phd / evalRecords.length) * 100}%` }}
-                title={`Ph.D.: ${qualificationStats.phd} (${qualificationStats.phdPct}%)`}
-              />
-            )}
-            {qualificationStats.pursuing > 0 && (
-              <div
-                className="stacked-bar__segment segment--pursuing"
-                style={{ width: `${(qualificationStats.pursuing / evalRecords.length) * 100}%` }}
-                title={`M.E. (Pursuing Ph.D.): ${qualificationStats.pursuing} (${qualificationStats.pursuingPct}%)`}
-              />
-            )}
-            {qualificationStats.me > 0 && (
-              <div
-                className="stacked-bar__segment segment--me"
-                style={{ width: `${(qualificationStats.me / evalRecords.length) * 100}%` }}
-                title={`M.E.: ${qualificationStats.me} (${qualificationStats.mePct}%)`}
-              />
-            )}
-            {qualificationStats.other > 0 && (
-              <div
-                className="stacked-bar__segment segment--other"
-                style={{ width: `${(qualificationStats.other / evalRecords.length) * 100}%` }}
-                title={`Other: ${qualificationStats.other} (${qualificationStats.otherPct}%)`}
-              />
-            )}
-          </div>
+          <div className="chart-panel__content-split">
+            {/* Donut Chart */}
+            <DonutChart
+              phd={qualificationStats.phd}
+              pursuing={qualificationStats.pursuing}
+              me={qualificationStats.me}
+              other={qualificationStats.other}
+              total={evalRecords.length}
+              phdPct={qualificationStats.phdPct}
+            />
 
-          <div className="breakdown-list">
-            <div
-              className="breakdown-row clickable"
-              onClick={() =>
-                onNavigateToRegister({
-                  department: selectedDept !== 'All' ? selectedDept : undefined,
-                  status: activeOnly ? 'Y' : 'All',
-                  query: 'PhD',
-                })
-              }
-              role="button"
-              tabIndex={0}
-              title="Click to view Ph.D. holders in register"
-            >
-              <div className="breakdown-label">
-                <span className="legend-dot segment--phd" />
-                <span>Ph.D.</span>
-              </div>
-              <div className="breakdown-stat">
-                <strong>{qualificationStats.phd}</strong>
-                <span className="breakdown-pct">{qualificationStats.phdPct}%</span>
-              </div>
-            </div>
-
-            <div
-              className="breakdown-row clickable"
-              onClick={() =>
-                onNavigateToRegister({
-                  department: selectedDept !== 'All' ? selectedDept : undefined,
-                  status: activeOnly ? 'Y' : 'All',
-                  query: 'pursuing',
-                })
-              }
-              role="button"
-              tabIndex={0}
-              title="Click to view faculty pursuing Ph.D. in register"
-            >
-              <div className="breakdown-label">
-                <span className="legend-dot segment--pursuing" />
-                <span>M.E. (Pursuing Ph.D.)</span>
-              </div>
-              <div className="breakdown-stat">
-                <strong>{qualificationStats.pursuing}</strong>
-                <span className="breakdown-pct">{qualificationStats.pursuingPct}%</span>
-              </div>
-            </div>
-
-            <div
-              className="breakdown-row clickable"
-              onClick={() =>
-                onNavigateToRegister({
-                  department: selectedDept !== 'All' ? selectedDept : undefined,
-                  status: activeOnly ? 'Y' : 'All',
-                  query: 'ME',
-                })
-              }
-              role="button"
-              tabIndex={0}
-              title="Click to view M.E. faculty in register"
-            >
-              <div className="breakdown-label">
-                <span className="legend-dot segment--me" />
-                <span>M.E.</span>
-              </div>
-              <div className="breakdown-stat">
-                <strong>{qualificationStats.me}</strong>
-                <span className="breakdown-pct">{qualificationStats.mePct}%</span>
-              </div>
-            </div>
-
-            {qualificationStats.other > 0 && (
-              <div className="breakdown-row">
+            {/* Breakdown List */}
+            <div className="breakdown-list flex-1">
+              <div
+                className="breakdown-row clickable"
+                onClick={() =>
+                  onNavigateToRegister({
+                    department: selectedDept !== 'All' ? selectedDept : undefined,
+                    status: activeOnly ? 'Y' : 'All',
+                    query: 'PhD',
+                  })
+                }
+                role="button"
+                tabIndex={0}
+                title="Click to view Ph.D. holders in register"
+              >
                 <div className="breakdown-label">
-                  <span className="legend-dot segment--other" />
-                  <span>Other degrees</span>
+                  <span className="legend-dot segment--phd" />
+                  <span>Ph.D.</span>
+                </div>
+                <div className="breakdown-center-bar">
+                  <div className="mini-meter-track">
+                    <div className="mini-meter-fill segment--phd" style={{ width: `${qualificationStats.phdPct}%` }} />
+                  </div>
                 </div>
                 <div className="breakdown-stat">
-                  <strong>{qualificationStats.other}</strong>
-                  <span className="breakdown-pct">{qualificationStats.otherPct}%</span>
+                  <strong>{qualificationStats.phd}</strong>
+                  <span className="breakdown-pct">{qualificationStats.phdPct}%</span>
                 </div>
               </div>
-            )}
+
+              <div
+                className="breakdown-row clickable"
+                onClick={() =>
+                  onNavigateToRegister({
+                    department: selectedDept !== 'All' ? selectedDept : undefined,
+                    status: activeOnly ? 'Y' : 'All',
+                    query: 'pursuing',
+                  })
+                }
+                role="button"
+                tabIndex={0}
+                title="Click to view faculty pursuing Ph.D. in register"
+              >
+                <div className="breakdown-label">
+                  <span className="legend-dot segment--pursuing" />
+                  <span>M.E. (Pursuing Ph.D.)</span>
+                </div>
+                <div className="breakdown-center-bar">
+                  <div className="mini-meter-track">
+                    <div className="mini-meter-fill segment--pursuing" style={{ width: `${qualificationStats.pursuingPct}%` }} />
+                  </div>
+                </div>
+                <div className="breakdown-stat">
+                  <strong>{qualificationStats.pursuing}</strong>
+                  <span className="breakdown-pct">{qualificationStats.pursuingPct}%</span>
+                </div>
+              </div>
+
+              <div
+                className="breakdown-row clickable"
+                onClick={() =>
+                  onNavigateToRegister({
+                    department: selectedDept !== 'All' ? selectedDept : undefined,
+                    status: activeOnly ? 'Y' : 'All',
+                    query: 'ME',
+                  })
+                }
+                role="button"
+                tabIndex={0}
+                title="Click to view M.E. faculty in register"
+              >
+                <div className="breakdown-label">
+                  <span className="legend-dot segment--me" />
+                  <span>M.E.</span>
+                </div>
+                <div className="breakdown-center-bar">
+                  <div className="mini-meter-track">
+                    <div className="mini-meter-fill segment--me" style={{ width: `${qualificationStats.mePct}%` }} />
+                  </div>
+                </div>
+                <div className="breakdown-stat">
+                  <strong>{qualificationStats.me}</strong>
+                  <span className="breakdown-pct">{qualificationStats.mePct}%</span>
+                </div>
+              </div>
+
+              {qualificationStats.other > 0 && (
+                <div className="breakdown-row">
+                  <div className="breakdown-label">
+                    <span className="legend-dot segment--other" />
+                    <span>Other degrees</span>
+                  </div>
+                  <div className="breakdown-center-bar">
+                    <div className="mini-meter-track">
+                      <div className="mini-meter-fill segment--other" style={{ width: `${qualificationStats.otherPct}%` }} />
+                    </div>
+                  </div>
+                  <div className="breakdown-stat">
+                    <strong>{qualificationStats.other}</strong>
+                    <span className="breakdown-pct">{qualificationStats.otherPct}%</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Panel B: Cadre Distribution (Cadre Ratio) */}
+        {/* Panel B: Cadre Distribution */}
         <div className="panel chart-panel">
           <div className="chart-panel__header">
             <div>
@@ -601,11 +789,18 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
                   status: activeOnly ? 'Y' : 'All',
                 })
               }
+              role="button"
+              tabIndex={0}
               title="Click to view Professors in register"
             >
               <div className="breakdown-label">
                 <span className="legend-dot segment--prof" />
                 <span>Professors</span>
+              </div>
+              <div className="breakdown-center-bar">
+                <div className="mini-meter-track">
+                  <div className="mini-meter-fill segment--prof" style={{ width: `${cadreStats.profPct}%` }} />
+                </div>
               </div>
               <div className="breakdown-stat">
                 <strong>{cadreStats.prof}</strong>
@@ -622,11 +817,18 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
                   status: activeOnly ? 'Y' : 'All',
                 })
               }
+              role="button"
+              tabIndex={0}
               title="Click to view Associate Professors in register"
             >
               <div className="breakdown-label">
                 <span className="legend-dot segment--assoc" />
                 <span>Associate Professors</span>
+              </div>
+              <div className="breakdown-center-bar">
+                <div className="mini-meter-track">
+                  <div className="mini-meter-fill segment--assoc" style={{ width: `${cadreStats.assocPct}%` }} />
+                </div>
               </div>
               <div className="breakdown-stat">
                 <strong>{cadreStats.assoc}</strong>
@@ -643,11 +845,18 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
                   status: activeOnly ? 'Y' : 'All',
                 })
               }
+              role="button"
+              tabIndex={0}
               title="Click to view Assistant Professors in register"
             >
               <div className="breakdown-label">
                 <span className="legend-dot segment--asst" />
                 <span>Assistant Professors</span>
+              </div>
+              <div className="breakdown-center-bar">
+                <div className="mini-meter-track">
+                  <div className="mini-meter-fill segment--asst" style={{ width: `${cadreStats.asstPct}%` }} />
+                </div>
               </div>
               <div className="breakdown-stat">
                 <strong>{cadreStats.asst}</strong>
@@ -660,6 +869,11 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
                 <div className="breakdown-label">
                   <span className="legend-dot segment--other" />
                   <span>Other designations</span>
+                </div>
+                <div className="breakdown-center-bar">
+                  <div className="mini-meter-track">
+                    <div className="mini-meter-fill segment--other" style={{ width: `${cadreStats.otherPct}%` }} />
+                  </div>
                 </div>
                 <div className="breakdown-stat">
                   <strong>{cadreStats.other}</strong>
@@ -688,24 +902,56 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
             <span className="tenure-badge">&lt; 2 yrs</span>
             <div className="tenure-count">{experienceStats.under2}</div>
             <span className="tenure-desc">Recent Joinees</span>
+            <div className="tenure-bar-track">
+              <div
+                className="tenure-bar-fill"
+                style={{
+                  width: `${evalRecords.length > 0 ? (experienceStats.under2 / evalRecords.length) * 100 : 0}%`,
+                }}
+              />
+            </div>
           </div>
 
           <div className="tenure-card">
             <span className="tenure-badge">2 – 5 yrs</span>
             <div className="tenure-count">{experienceStats.twoTo5}</div>
             <span className="tenure-desc">Established Faculty</span>
+            <div className="tenure-bar-track">
+              <div
+                className="tenure-bar-fill"
+                style={{
+                  width: `${evalRecords.length > 0 ? (experienceStats.twoTo5 / evalRecords.length) * 100 : 0}%`,
+                }}
+              />
+            </div>
           </div>
 
           <div className="tenure-card">
             <span className="tenure-badge">5 – 10 yrs</span>
             <div className="tenure-count">{experienceStats.fiveTo10}</div>
             <span className="tenure-desc">Senior Faculty</span>
+            <div className="tenure-bar-track">
+              <div
+                className="tenure-bar-fill"
+                style={{
+                  width: `${evalRecords.length > 0 ? (experienceStats.fiveTo10 / evalRecords.length) * 100 : 0}%`,
+                }}
+              />
+            </div>
           </div>
 
           <div className="tenure-card">
             <span className="tenure-badge">&gt; 10 yrs</span>
             <div className="tenure-count">{experienceStats.over10}</div>
             <span className="tenure-desc">Anchor Faculty</span>
+            <div className="tenure-bar-track">
+              <div
+                className="tenure-bar-fill"
+                style={{
+                  width: `${evalRecords.length > 0 ? (experienceStats.over10 / evalRecords.length) * 100 : 0}%`,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -738,10 +984,23 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
             <tbody>
               {departmentBreakdown.map((d) => (
                 <tr key={d.name}>
-                  <td className="name">{d.name}</td>
+                  <td className="name">
+                    <div className="dept-cell">
+                      <span className="dept-code-pill">{getDepartmentCode(d.name)}</span>
+                      <span>{d.name}</span>
+                    </div>
+                  </td>
                   <td>
-                    <strong>{d.active}</strong> active
-                    {d.total > d.active && <span className="hint"> ({d.total} total)</span>}
+                    <div className="strength-cell">
+                      <span><strong>{d.active}</strong> active</span>
+                      {d.total > d.active && <span className="hint">({d.total} total)</span>}
+                    </div>
+                    <div className="table-mini-track">
+                      <div
+                        className="table-mini-fill"
+                        style={{ width: `${d.total > 0 ? Math.round((d.active / d.total) * 100) : 0}%` }}
+                      />
+                    </div>
                   </td>
                   <td>
                     <span className="stamp stamp--brass">{d.phd} Ph.D. ({d.phdPct}%)</span>
@@ -753,14 +1012,16 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
                     {d.prof}P / {d.assoc}Assoc / {d.asst}Asst
                   </td>
                   <td>
-                    <span className="stamp stamp--regular">{d.regular} Reg</span>{' '}
-                    {d.contract > 0 && <span className="stamp stamp--contract">{d.contract} Cont</span>}
+                    <div className="assoc-badge-group">
+                      <span className="stamp stamp--regular">{d.regular} Reg</span>
+                      {d.contract > 0 && <span className="stamp stamp--contract">{d.contract} Cont</span>}
+                    </div>
                   </td>
                   <td className="mono">{d.avgExp} yrs</td>
                   <td>
                     <button
                       type="button"
-                      className="icon-btn"
+                      className="icon-btn action-link-btn"
                       onClick={() =>
                         onNavigateToRegister({
                           department: d.name,
