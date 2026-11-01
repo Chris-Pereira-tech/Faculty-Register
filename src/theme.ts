@@ -17,7 +17,9 @@ export function setTheme(theme: Theme) {
     if (meta) meta.setAttribute('content', theme);
     document.documentElement.setAttribute('data-theme', theme);
     window.dispatchEvent(new Event('theme-change'));
-  } catch (_) {}
+  } catch {
+    // ignore
+  }
 }
 
 export function toggleTheme(): Theme {

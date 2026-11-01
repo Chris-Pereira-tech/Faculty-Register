@@ -901,11 +901,38 @@ table.ledger th.wrap-col {
   border-radius: 5px;
   padding: 6px 14px;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .lock-btn:hover {
   border-color: var(--ink-soft);
   color: var(--ink);
+}
+
+.theme-toggle-btn {
+  font-size: 14px;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--brass);
+  color: var(--ink);
+  background: var(--paper-alt);
+}
+
+.login-card__top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
 }
 
 /* ---------- Dashboard ---------- */
@@ -1572,5 +1599,76 @@ table.ledger th.wrap-col {
 .stamp--brass {
   color: var(--brass);
   background: var(--brass-soft);
+}
+
+/* Dark Mode Overrides & Contrast Enhancements */
+:root[data-theme='dark'] .stamp--blue {
+  color: #93c5fd;
+  background: rgba(30, 58, 138, 0.35);
+}
+
+:root[data-theme='dark'] .kpi-badge--blue {
+  color: #93c5fd;
+  background: rgba(30, 58, 138, 0.35);
+}
+
+:root[data-theme='dark'] .kpi-icon-wrap--blue {
+  color: #93c5fd;
+  background: rgba(30, 58, 138, 0.35);
+}
+
+:root[data-theme='dark'] .login-card {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme='dark'] .kpi-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme='dark'] .kpi-card[role='button']:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme='dark'] .table-mini-track,
+:root[data-theme='dark'] .kpi-bar-track,
+:root[data-theme='dark'] .mini-meter-track,
+:root[data-theme='dark'] .tenure-bar-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .stamp--blue {
+    color: #93c5fd;
+    background: rgba(30, 58, 138, 0.35);
+  }
+
+  :root:not([data-theme='light']) .kpi-badge--blue {
+    color: #93c5fd;
+    background: rgba(30, 58, 138, 0.35);
+  }
+
+  :root:not([data-theme='light']) .kpi-icon-wrap--blue {
+    color: #93c5fd;
+    background: rgba(30, 58, 138, 0.35);
+  }
+
+  :root:not([data-theme='light']) .login-card {
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  }
+
+  :root:not([data-theme='light']) .kpi-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  :root:not([data-theme='light']) .kpi-card[role='button']:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  :root:not([data-theme='light']) .table-mini-track,
+  :root:not([data-theme='light']) .kpi-bar-track,
+  :root:not([data-theme='light']) .mini-meter-track,
+  :root:not([data-theme='light']) .tenure-bar-track {
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
