@@ -545,7 +545,7 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
           </div>
         </div>
 
-        {/* Panel B: Cadre Distribution (AICTE Cadre Ratio) */}
+        {/* Panel B: Cadre Distribution (Cadre Ratio) */}
         <div className="panel chart-panel">
           <div className="chart-panel__header">
             <div>
@@ -555,7 +555,7 @@ export default function Dashboard({ records, onNavigateToRegister }: DashboardPr
               </p>
             </div>
             <span className="stat-pill-label">
-              AICTE Target Ratio: <strong>1 : 2 : 6</strong>
+              Target Ratio: <strong>1 : 2 : 6</strong>
             </span>
           </div>
 
