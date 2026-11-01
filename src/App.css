@@ -23,7 +23,7 @@
 .letterhead__title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 28px;
+  font-size: 32px;
   letter-spacing: 0.01em;
   margin: 0;
 }
@@ -32,7 +32,7 @@
   display: block;
   font-family: var(--font-body);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ink-soft);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -41,7 +41,7 @@
 
 .letterhead__count {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 15px;
   color: var(--ink-soft);
   text-align: right;
 }
@@ -54,7 +54,7 @@
 }
 
 .letterhead__count strong {
-  font-size: 24px;
+  font-size: 28px;
   color: var(--ink);
   display: block;
   font-family: var(--font-display);
@@ -70,8 +70,8 @@
   border: 1px solid transparent;
   border-bottom: none;
   background: transparent;
-  padding: 12px 22px;
-  font-size: 15.5px;
+  padding: 12px 24px;
+  font-size: 17px;
   font-weight: 500;
   color: var(--ink-soft);
   cursor: pointer;
@@ -145,7 +145,7 @@
 
 .form-section__number {
   font-family: var(--font-mono);
-  font-size: 13.5px;
+  font-size: 14.5px;
   color: var(--brass);
   border: 1px solid var(--brass-soft);
   background: var(--brass-soft);
@@ -155,7 +155,7 @@
 
 .form-section__title {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   margin: 0;
 }
@@ -177,16 +177,16 @@
 }
 
 .field label {
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 600;
   color: var(--ink-soft);
   letter-spacing: 0.01em;
-  min-height: 38px; /* reserves space for a wrapped hint so inputs stay aligned across a row */
+  min-height: 42px; /* reserves space for a wrapped hint so inputs stay aligned across a row */
   line-height: 1.38;
 }
 
 .field .hint {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--line-strong);
   font-weight: 400;
 }
@@ -194,8 +194,8 @@
 .field input,
 .field select {
   font-family: var(--font-body);
-  font-size: 15px;
-  padding: 10px 12px;
+  font-size: 16.5px;
+  padding: 11px 14px;
   border: 1px solid var(--line);
   border-radius: 5px;
   background: var(--paper);
@@ -243,8 +243,8 @@
 
 .select-or-other input {
   font-family: var(--font-body);
-  font-size: 15px;
-  padding: 10px 12px;
+  font-size: 16.5px;
+  padding: 11px 14px;
   border: 1px solid var(--line);
   border-radius: 5px;
   background: var(--paper);
@@ -256,14 +256,14 @@
   background: none;
   border: none;
   padding: 0;
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--brass);
   text-decoration: underline;
   cursor: pointer;
 }
 
 .field .error-text {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--rust);
   font-weight: 500;
 }
@@ -273,7 +273,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 4px;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 500;
   color: var(--ink);
   cursor: pointer;
@@ -281,8 +281,8 @@
 }
 
 .checkbox-field-inline input[type='checkbox'] {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   accent-color: var(--brass);
   cursor: pointer;
 }
@@ -298,7 +298,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 14.5px;
+  font-size: 15.5px;
   font-weight: 500;
   color: var(--ink);
   cursor: pointer;
@@ -306,8 +306,8 @@
 
 .radio-row input {
   accent-color: var(--brass);
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
 }
 
 .form-actions {
@@ -321,15 +321,15 @@
 }
 
 .form-actions .status-msg {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--green);
   font-weight: 500;
 }
 
 .btn {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  padding: 10px 22px;
+  padding: 11px 24px;
   border-radius: 5px;
   border: 1px solid var(--ink);
   background: var(--ink);
@@ -398,7 +398,7 @@
 }
 
 .report-title-row label {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--ink-soft);
   white-space: nowrap;
@@ -406,7 +406,7 @@
 
 .report-title-row input {
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 15.5px;
   padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 5px;
@@ -421,7 +421,7 @@
 }
 
 .report-title-row .hint {
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--line-strong);
 }
 
@@ -436,7 +436,7 @@
   padding: 10px 34px 10px 36px;
   border: 1px solid var(--line);
   border-radius: 5px;
-  font-size: 14.5px;
+  font-size: 16px;
   background: var(--paper);
 }
 
@@ -457,7 +457,7 @@
   border: none;
   color: var(--ink-soft);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14.5px;
   padding: 4px 6px;
   line-height: 1;
   border-radius: 4px;
@@ -475,9 +475,9 @@
 }
 
 .filter-chip {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 500;
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: var(--paper);
@@ -492,9 +492,9 @@
 }
 
 .filter-select {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 500;
-  padding: 7px 12px;
+  padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: var(--paper);
@@ -515,7 +515,7 @@
 table.ledger {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14.5px;
+  font-size: 16px;
   min-width: 1020px;
 }
 
@@ -523,11 +523,11 @@ table.ledger thead th {
   text-align: left;
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 12.5px;
+  font-size: 14px;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-bottom: 2px solid var(--ink);
   white-space: nowrap;
   cursor: pointer;
@@ -644,14 +644,14 @@ table.ledger td.status-cell {
 }
 
 table.ledger td {
-  padding: 12px 14px;
+  padding: 13px 16px;
   vertical-align: middle;
   white-space: nowrap;
 }
 
 table.ledger td.mono {
   font-family: var(--font-mono);
-  font-size: 13.5px;
+  font-size: 15px;
   color: var(--ink-soft);
 }
 
@@ -675,9 +675,9 @@ table.ledger th.wrap-col {
   border: 1px solid var(--line);
   background: var(--paper-raised);
   border-radius: 4px;
-  padding: 6px 10px;
+  padding: 7px 12px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--ink-soft);
 }
 
@@ -697,11 +697,11 @@ table.ledger th.wrap-col {
   align-items: center;
   justify-content: center;
   min-width: 80px;
-  padding: 4px 11px;
+  padding: 5px 12px;
   border-radius: 3px;
   border: 1.5px solid currentColor;
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -727,11 +727,11 @@ table.ledger th.wrap-col {
   align-items: center;
   justify-content: center;
   min-width: 66px;
-  padding: 4px 11px;
+  padding: 5px 12px;
   border-radius: 3px;
   border: 1.5px solid currentColor;
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -752,7 +752,7 @@ table.ledger th.wrap-col {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
 }
 
@@ -785,14 +785,14 @@ table.ledger th.wrap-col {
 
 .empty-state h3 {
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 24px;
   color: var(--ink);
   margin: 0 0 8px;
 }
 
 .empty-state p {
   margin: 0 0 20px;
-  font-size: 15px;
+  font-size: 16.5px;
 }
 
 .empty-table-cell {
@@ -842,7 +842,7 @@ table.ledger th.wrap-col {
 .login-card__title {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 24px;
+  font-size: 27px;
   margin: 0 0 4px;
   text-align: center;
 }
@@ -851,7 +851,7 @@ table.ledger th.wrap-col {
   display: block;
   font-family: var(--font-body);
   font-weight: 500;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-soft);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -860,7 +860,7 @@ table.ledger th.wrap-col {
 
 .login-card__hint {
   text-align: center;
-  font-size: 14px;
+  font-size: 15.5px;
   color: var(--ink-soft);
   margin: 10px 0 20px;
 }
@@ -879,7 +879,7 @@ table.ledger th.wrap-col {
 }
 
 .lock-btn {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--ink-soft);
   background: none;
@@ -915,14 +915,14 @@ table.ledger th.wrap-col {
 
 .dashboard-title {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   margin: 0 0 4px;
   color: var(--ink);
 }
 
 .dashboard-subtitle {
-  font-size: 14px;
+  font-size: 15.5px;
   color: var(--ink-soft);
   margin: 0;
 }
@@ -941,7 +941,7 @@ table.ledger th.wrap-col {
 }
 
 .control-field label {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--ink-soft);
   letter-spacing: 0.02em;
@@ -960,8 +960,8 @@ table.ledger th.wrap-col {
 .dashboard-toggle-group .toggle-btn {
   border: none;
   background: transparent;
-  padding: 6px 14px;
-  font-size: 13.5px;
+  padding: 7px 16px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--ink-soft);
   border-radius: 999px;
@@ -1012,7 +1012,7 @@ table.ledger th.wrap-col {
 }
 
 .kpi-label {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--ink-soft);
   text-transform: uppercase;
@@ -1021,9 +1021,9 @@ table.ledger th.wrap-col {
 
 .kpi-badge {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 3px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -1051,7 +1051,7 @@ table.ledger th.wrap-col {
 
 .kpi-value {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: 38px;
   font-weight: 700;
   color: var(--ink);
   line-height: 1.15;
@@ -1060,7 +1060,7 @@ table.ledger th.wrap-col {
 
 .kpi-unit {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   color: var(--ink-soft);
   margin-left: 2px;
@@ -1070,13 +1070,13 @@ table.ledger th.wrap-col {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--ink-soft);
 }
 
 .kpi-foot-sub {
   color: var(--line-strong);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 /* Two-column layout */
@@ -1088,7 +1088,7 @@ table.ledger th.wrap-col {
 
 /* Chart panels */
 .chart-panel {
-  padding: 22px 26px;
+  padding: 24px 28px;
 }
 
 .chart-panel__header {
@@ -1102,23 +1102,23 @@ table.ledger th.wrap-col {
 
 .chart-panel__title {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 600;
   margin: 0 0 2px;
   color: var(--ink);
 }
 
 .chart-panel__sub {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--ink-soft);
   margin: 0;
 }
 
 .stat-pill-label {
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--ink-soft);
   background: var(--paper-alt);
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 4px;
   border: 1px solid var(--line);
 }
@@ -1130,9 +1130,9 @@ table.ledger th.wrap-col {
 /* Stacked horizontal visual bar */
 .stacked-bar {
   display: flex;
-  height: 16px;
+  height: 18px;
   width: 100%;
-  border-radius: 8px;
+  border-radius: 9px;
   overflow: hidden;
   background: var(--paper-alt);
   margin-bottom: 18px;
@@ -1183,11 +1183,11 @@ table.ledger th.wrap-col {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 9px 12px;
+  padding: 10px 14px;
   border-radius: 5px;
   background: var(--paper);
   border: 1px solid var(--line);
-  font-size: 14px;
+  font-size: 15.5px;
 }
 
 .breakdown-row.clickable {
@@ -1223,13 +1223,13 @@ table.ledger th.wrap-col {
 
 .breakdown-stat strong {
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 16.5px;
   color: var(--ink);
 }
 
 .breakdown-pct {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-soft);
   min-width: 42px;
   text-align: right;
@@ -1246,20 +1246,20 @@ table.ledger th.wrap-col {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 16px;
+  padding: 18px 16px;
   text-align: center;
 }
 
 .tenure-badge {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--ink-soft);
   background: var(--paper-raised);
   border: 1px solid var(--line);
   border-radius: 3px;
-  padding: 2px 8px;
+  padding: 3px 9px;
   margin-bottom: 8px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1267,14 +1267,14 @@ table.ledger th.wrap-col {
 
 .tenure-count {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 700;
   color: var(--ink);
   margin-bottom: 4px;
 }
 
 .tenure-desc {
-  font-size: 12.5px;
+  font-size: 14px;
   color: var(--ink-soft);
 }
 
